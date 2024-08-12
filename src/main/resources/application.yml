@@ -1,0 +1,19 @@
+spring: 
+  application:  
+    name: document-service
+  main: 
+    allow-bean-definition-overriding: true
+  datasource: 
+    jdbc-url: jdbc:mysql://10.15.43.30:3306/vtigercrm54
+    username: sroot
+    password: 12345
+    driver-class-name:  com.mysql.cj.jdbc.Driver
+ 
+server:
+  port: 8012
+  
+logging:
+  level: 
+    root: warn 
+    com:  
+      bankmega: debug
