@@ -1,7 +1,5 @@
 package com.bankmega.ccbmagent.document.controller;
 
-import java.sql.SQLSyntaxErrorException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,12 +29,6 @@ public class CcbmDocumentController {
     @GetMapping("/test")
     public String getTest() {
         return "Test Success";
-    }
-
-    @GetMapping("/test-exception")
-    public HttpEntity<MampangApiResponse> getException() throws Throwable {
-        // throw new JsException("404", "error", HttpStatus.BAD_REQUEST);
-        throw new SQLSyntaxErrorException("test");
     }
 
     @PostMapping("/get")
