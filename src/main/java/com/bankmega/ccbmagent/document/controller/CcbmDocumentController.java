@@ -2,6 +2,7 @@ package com.bankmega.ccbmagent.document.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,8 +10,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bankmega.ccbmagent.document.services.CcbmDocumentService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import mampang.validation.component.JsResponseGenerator;
 import mampang.validation.dto.MampangApiResponse;
+import mampang.validation.exception.JsException;
 
 @RestController
 @RequestMapping("/ccbm/document")
@@ -22,6 +25,9 @@ public class CcbmDocumentController {
     @Autowired
     private JsResponseGenerator jsr;
 
+    @Autowired
+    private HttpServletRequest requestHeader;
+
     // @PostMapping(value = "/ccbm/document/insert")
     // public ResponseEntity<?> insertDocument(@ModelAttribute InsertDocumentRequest request) {
     // 	return ResponseEntity.status(HttpStatus.OK).body(service.insertingDocument(request));
@@ -31,13 +37,17 @@ public class CcbmDocumentController {
         return "Test Success";
     }
 
+    @GetMapping("/test-exception")
+    public String getTestEx() throws Exception {
+        throw new Exception("haihai");
+    }
+
     @PostMapping("/get")
     public HttpEntity<MampangApiResponse> getDocuments() {
-        try {
-            return service.getDocument();
-        } catch (Exception e) {
-            return jsr.internalServerError("404", "Error: " + e.getMessage());
+        if (requestHeader.getHeader("username") == null) {
+            throw new JsException("404", "Ditemukan Header Kosong => username", HttpStatus.OK);
         }
+        return service.getDocument();
     }
 
 }
