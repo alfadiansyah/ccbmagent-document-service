@@ -27,8 +27,8 @@ public class CcbmDocumentService {
         return null;
     }
 
-    public HttpEntity<MampangApiResponse> getDocument() {
-        Object result = mapper.getListDocument("1466734");
+    public HttpEntity<MampangApiResponse> getDocument(String ticketId) {
+        Object result = mapper.getListDocument(ticketId);
         return jsr.ok(result, "00", "Sukses Mendapatkan List Document");
     }
 
