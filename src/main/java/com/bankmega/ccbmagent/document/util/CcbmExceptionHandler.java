@@ -7,18 +7,26 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import mampang.validation.MampangExceptionHandler;
-import mampang.validation.dto.MampangApiResponse;
+import com.bankmega.ccbmagent.document.model.responses.ApiResponse;
+
+import mampang.validation.exception.JsException;
 
 @ControllerAdvice
-public class CcbmExceptionHandler extends MampangExceptionHandler {
+public class CcbmExceptionHandler {
 
-    @Override
+    @ExceptionHandler(JsException.class)
+    public ResponseEntity<ApiResponse> handleJsExceptionCcbm(JsException e) {
+        return ResponseEntity
+                .status(e.getHttpStatus())
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(new ApiResponse(e.getRc(), e.getRd(), null));
+    }
+
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<MampangApiResponse> handleException(Exception e) {
+    public ResponseEntity<ApiResponse> handleExceptionCcbm(Exception e) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .body(new MampangApiResponse(null, "404", "EXCEPTION MESSAGE: " + e.getMessage()));
+                .body(new ApiResponse("404", "EXCEPTION MESSAGE: " + e.getMessage(), null));
     }
 }
