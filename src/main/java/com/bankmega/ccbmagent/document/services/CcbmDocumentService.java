@@ -3,10 +3,12 @@ package com.bankmega.ccbmagent.document.services;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.bankmega.ccbmagent.document.components.FileComponent;
 import com.bankmega.ccbmagent.document.components.ResponseGenerator;
 import com.bankmega.ccbmagent.document.mappers.CcbmDocumentMapper;
 import com.bankmega.ccbmagent.document.model.requests.DownloadDocumentRequest;
@@ -27,6 +29,9 @@ public class CcbmDocumentService {
     @Autowired
     private ResponseGenerator response;
 
+    @Autowired
+    private FileComponent file;
+
     // public Object insertingDocument(InsertDocumentRequest request) {
     //     String fileName = request.getFile().getOriginalFilename().replaceAll(" ", "_");
     //     String fileType = request.getFile().getContentType();
@@ -38,7 +43,7 @@ public class CcbmDocumentService {
         return response.success(result, "00", "Sukses Mendapatkan List Document");
     }
 
-    public ResponseEntity<ApiResponse> downloadDocument(DownloadDocumentRequest request) {
+    public ResponseEntity<InputStreamResource> downloadDocument(DownloadDocumentRequest request) {
         CheckIsDocumentDeletedResponse isDeleted = mapper.checkIsDocumentDeleted(request.getDocumentId());
 
         System.out.println("CHECK DOCUMENT DELETED STATUS: " + isDeleted);
@@ -55,6 +60,8 @@ public class CcbmDocumentService {
             throw new JsException("404", "Tidak ada dokumen dengan ID: " + request.getDocumentId(), HttpStatus.OK);
         }
 
+        System.out.println("SUKSES MENDAPATKAN LOKASI, MENCOBA DOWNLOAD DOKUMEN");
+
         GetDocumentDownloadCountResponse downloadCount = mapper.getDocumentDownloadCount(request.getDocumentId());
 
         System.out.println("DOWNLOAD COUNT: " + downloadCount);
@@ -65,8 +72,13 @@ public class CcbmDocumentService {
 
         Integer updatedFileDownloadCount = downloadCount.getFileDownloadCount() + 1;
         mapper.updateDocumentDownloadStatus(request.getDocumentId(), updatedFileDownloadCount);
-        System.out.println("SUKSES DOWNLOAD DOCUMENT");
-        return response.success(documentLocation.generatePathLocation(), "00", "Sukses Download Document");
+
+        System.out.println("SUKSES UPDATE DOWNLOAD STATUS");
+
+        System.out.println("MENCOBA DOWNLOAD FILE");
+
+        String generatedDocumentLocation = documentLocation.generatePathLocation();
+        return file.downloadFrom(generatedDocumentLocation);
     }
 
 }
