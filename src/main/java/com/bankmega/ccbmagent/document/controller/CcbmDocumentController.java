@@ -48,7 +48,7 @@ public class CcbmDocumentController {
     @GetMapping("/test-exception")
     public String getTestEx() {
         // throw new Exception("halo saya exception");
-        throw new JsException("999", "halo saya exception", HttpStatus.OK);
+        throw new JsException("999", "halo saya exception", HttpStatus.BAD_REQUEST);
 
     }
 

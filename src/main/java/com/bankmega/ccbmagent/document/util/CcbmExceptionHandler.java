@@ -24,9 +24,10 @@ public class CcbmExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse> handleExceptionCcbm(Exception e) {
+        System.out.println("UNHANDLED EXCEPTION: " + e.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .body(new ApiResponse("404", "EXCEPTION MESSAGE: " + e.getMessage(), null));
+                .body(new ApiResponse("404", "NOT FOUND", null));
     }
 }

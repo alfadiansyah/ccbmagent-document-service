@@ -40,6 +40,11 @@ public class CcbmDocumentService {
     // }
     public ResponseEntity<ApiResponse> getDocument(String ticketId) {
         List<GetDocumentResponse> result = mapper.getListDocument(ticketId);
+
+        if (result == null || result.size() < 1) {
+            throw new JsException("404", "NOT FOUND", HttpStatus.BAD_REQUEST);
+        }
+
         return response.success(result, "00", "Sukses Mendapatkan List Document");
     }
 
