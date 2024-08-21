@@ -42,18 +42,18 @@ public class CcbmDocumentService {
         List<GetDocumentResponse> result = mapper.getListDocument(ticketId);
 
         if (result == null || result.size() < 1) {
-            throw new JsException("404", "NOT FOUND", HttpStatus.BAD_REQUEST);
+            throw new JsException("404", "NOT FOUND", HttpStatus.NOT_FOUND);
         }
 
         return response.success(result, "00", "Sukses Mendapatkan List Document");
     }
 
     public ResponseEntity<InputStreamResource> downloadDocument(DownloadDocumentRequest request) {
-        CheckIsDocumentDeletedResponse isDeleted = mapper.checkIsDocumentDeleted(request.getDocumentId());
+        CheckIsDocumentDeletedResponse documentDeletedResponse = mapper.checkIsDocumentDeleted(request.getDocumentId());
 
-        System.out.println("CHECK DOCUMENT DELETED STATUS: " + isDeleted);
+        System.out.println("CHECK DOCUMENT DELETED STATUS: " + documentDeletedResponse);
 
-        if (isDeleted.equals(1)) {
+        if (documentDeletedResponse.getDeleted().equals(1)) {
             throw new JsException("404", "Dokumen Sudah Dihapus", HttpStatus.NO_CONTENT);
         }
 
