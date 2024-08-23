@@ -34,4 +34,7 @@ public class GetDocumentResponse {
   private Integer fileStatus;
   private Integer fileSize;
   private String fileversion;
+
+  private String foldername;
+
 }

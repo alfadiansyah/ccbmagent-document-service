@@ -16,6 +16,7 @@ public class InsertDocumentRequest {
 	private String ticketId;
 	private String assignTo;
 	private String title;
+	private String userId;
 	private String descriptionAttachment;
 	private MultipartFile file;
 	private Boolean fileStatus;

@@ -17,6 +17,8 @@ logging:
     root: warn 
     com:  
       bankmega: debug
+      org.springframework.security: debug
+
 
 springdoc:
   swagger-ui:
