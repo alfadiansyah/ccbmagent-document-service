@@ -2,6 +2,7 @@ package com.bankmega.ccbmagent.document.mappers;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -82,5 +83,17 @@ public interface CcbmDocumentMapper {
     //jumlah count +1 update kesini
     @Update("UPDATE vtiger_notes set filedownloadcount= ${fileDownloadCount} where notesid= '${documentId}'")
     public void updateDocumentDownloadStatus(String documentId, Integer fileDownloadCount);
+
+    //Delete document
+    @Delete("DELETE FROM vtiger_senotesrel WHERE notesid = '${notesId}' AND crmid = '${crmId}'")
+    public void deleteDocument(String notesId, String crmId);
+
+    //Update document status
+    @Update("UPDATE vtiger_crmentity SET modifiedtime = '2024-08-26 13:59:18', modifiedby = '1' WHERE crmid = '${crmId}'")
+    public void updateDocumentStatus(String timeStamp, String crmId);
+
+    //set update log (detil log cek lagi di github)
+    @Update("UPDATE vtiger_troubletickets SET update_log = '${log}' WHERE ticketid = '${paramTicketId}'")
+    public void setUpdateLog(String log, String paramTicketId);
 
 }
