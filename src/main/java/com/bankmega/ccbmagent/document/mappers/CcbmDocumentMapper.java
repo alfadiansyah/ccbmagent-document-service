@@ -209,15 +209,15 @@ public interface CcbmDocumentMapper {
 
     //Get log sebelumnya
     @Select("SELECT update_log AS log FROM vtiger_troubletickets WHERE ticketId = '${ticketId}'")
-    public String getPreviousLogByTicketId(String ticketId);
+    public String getDocumentLogPreviousLogByTicketId(String ticketId);
 
     //set update log (detil log cek lagi di github)
     //log: [isi log sebelumnya + Document namafile was deleted [hari tanggal bulan tahun time AM/PM] by [paramUserId]]
     @Update("UPDATE vtiger_troubletickets SET update_log = '${log}' WHERE ticketid = '${ticketId}'")
-    public void setUpdateLog(String log, String ticketId);
+    public void setDocumentUpdateLog(String log, String ticketId);
 
     @Select("SELECT filename as filename FROM vtiger_notes WHERE notesid = '${documentId}'")
-    public String getFileNameByDocumentId(String documentId);
+    public String getDocumentFileNameByDocumentId(String documentId);
 
     @Select("SELECT user_name as userName FROM vtiger_users WHERE id = '${userId}'")
     public String getUserNameByUserId(String userId);

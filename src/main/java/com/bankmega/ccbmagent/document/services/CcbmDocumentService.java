@@ -162,14 +162,14 @@ public class CcbmDocumentService {
 
 
         //GET LOG SEBELUMNYA
-        String previousLog = mapper.getPreviousLogByTicketId(request.getTicketId());
+        String previousLog = mapper.getDocumentLogPreviousLogByTicketId(request.getTicketId());
         if (previousLog == null) {
             System.out.println("TIDAK DAPAT DITEMUKAN LOG SEBELUMNYA UNTUK TICKETID: " + request.getTicketId());
             previousLog = "";
         }
 
         //Get Document File Name
-        String documentFileName = mapper.getFileNameByDocumentId(request.getDocumentId());
+        String documentFileName = mapper.getDocumentFileNameByDocumentId(request.getDocumentId());
         if (documentFileName == null) {
             System.out.println("TIDAK ADA DOKUMEN DENGAN DOCUMENTID: " + request.getDocumentId());
             documentFileName = "DOCUMENT NOT FOUND";
@@ -189,7 +189,7 @@ public class CcbmDocumentService {
         System.out.println("LOG UNTUK DI POSTING: " + newLog);
 
         // INSERT NEW LOG TO DB
-        mapper.setUpdateLog(newLog, request.getTicketId());
+        mapper.setDocumentUpdateLog(newLog, request.getTicketId());
 
         System.out.println("SUKSES MENGHAPUS DOKUMEN DENGAN ID: " + request.getDocumentId() + " DAN TICKETID: " + request.getTicketId());
         return response.success(null, "00", "Sukses Menghapus Dokumen");
