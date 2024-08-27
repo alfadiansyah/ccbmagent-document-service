@@ -1,25 +1,25 @@
-spring:
-  application:
+spring: 
+  application:  
     name: document-service
-  main:
+  main: 
     allow-bean-definition-overriding: true
-  datasource:
+  datasource: 
     jdbc-url: jdbc:mysql://10.15.43.30:3306/vtigercrm54
     username: sroot
     password: 12345
-    driver-class-name: com.mysql.cj.jdbc.Driver
-
+    driver-class-name:  com.mysql.cj.jdbc.Driver
+ 
 server:
-  port: 8013
-
+  port: 8012
+  
 logging:
-  level:
-    root: warn
-    com:
+  level: 
+    root: warn 
+    com:  
       bankmega: debug
 
-#swagger config
 springdoc:
   swagger-ui:
     disable-swagger-default-url: true
     path: /
+
