@@ -147,18 +147,20 @@ public class CcbmDocumentService {
     public ResponseEntity<ApiResponse> deleteDocument(DeleteDocumentRequest request) {
 
         //CEK KETERSEDIAAN DATA
-        // Integer isDocumentAvailable = mapper.findDocumentByDocumentIdAndTicketId(request.getDocumentId(), request.getTicketId());
-
-        // System.out.println("ISDOCUMENTAVAILABLE: " + isDocumentAvailable);
-
-        // if (isDocumentAvailable == null || isDocumentAvailable.equals(0)) {
-        //     throw new JsException("404", "NOT FOUND", HttpStatus.NOT_FOUND);
-        // }
+        Integer isDocumentAvailable = mapper.findDocumentByDocumentIdAndTicketId(request.getDocumentId(), request.getTicketId());
+        System.out.println("ISDOCUMENTAVAILABLE: " + isDocumentAvailable);
+        if (isDocumentAvailable == null || isDocumentAvailable.equals(0)) {
+            throw new JsException("404", "NOT FOUND", HttpStatus.NOT_FOUND);
+        }
 
         //DELETE DOKUMEN
-        // mapper.deleteDocumentByDocumentIdAndTicketId(request.getDocumentId(), request.getTicketId());
+        mapper.deleteDocumentByDocumentIdAndTicketId(request.getDocumentId(), request.getTicketId());
+
+
         //UPDATE STATUS DOKUMEN
-        // mapper.updateDocumentStatus(time.getTimeStamp(), request.getUserId(), request.getTicketId());
+        mapper.updateDocumentStatus(time.getTimeStamp(), request.getUserId(), request.getTicketId());
+
+
         //GET LOG SEBELUMNYA
         String previousLog = mapper.getPreviousLogByTicketId(request.getTicketId());
         if (previousLog == null) {
@@ -182,13 +184,12 @@ public class CcbmDocumentService {
 
         //SET LOG DENGAN FORMAT: [[isi log sebelumnya] + [Document namafile] was deleted [hari tanggal bulan tahun time AM/PM] by [userName]]
         String newLog = stringComponent.joinStringWithSpace(new String[]{previousLog, documentFileName, "was deleted", time.getTimeStamp(), "by", userName});
-
         newLog = newLog+"--//--";
 
         System.out.println("LOG UNTUK DI POSTING: " + newLog);
 
         // INSERT NEW LOG TO DB
-        // mapper.setUpdateLog(log, request.getTicketId());
+        mapper.setUpdateLog(newLog, request.getTicketId());
 
         System.out.println("SUKSES MENGHAPUS DOKUMEN DENGAN ID: " + request.getDocumentId() + " DAN TICKETID: " + request.getTicketId());
         return response.success(null, "00", "Sukses Menghapus Dokumen");
