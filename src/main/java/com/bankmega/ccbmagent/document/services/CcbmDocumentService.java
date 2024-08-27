@@ -156,10 +156,8 @@ public class CcbmDocumentService {
         //DELETE DOKUMEN
         mapper.deleteDocumentByDocumentIdAndTicketId(request.getDocumentId(), request.getTicketId());
 
-
         //UPDATE STATUS DOKUMEN
         mapper.updateDocumentStatus(time.getTimeStamp(), request.getUserId(), request.getTicketId());
-
 
         //GET LOG SEBELUMNYA
         String previousLog = mapper.getDocumentLogPreviousLogByTicketId(request.getTicketId());
@@ -183,8 +181,8 @@ public class CcbmDocumentService {
         }
 
         //SET LOG DENGAN FORMAT: [[isi log sebelumnya] + [Document namafile] was deleted [hari tanggal bulan tahun time AM/PM] by [userName]]
-        String newLog = stringComponent.joinStringWithSpace(new String[]{previousLog, documentFileName, "was deleted", time.getTimeStamp(), "by", userName});
-        newLog = newLog+"--//--";
+        String newLog = stringComponent.joinStringWithSpace(new String[]{previousLog, "Document", documentFileName, "was deleted", time.getTimeStamp(), "by", userName});
+        newLog = newLog + "--//--";
 
         System.out.println("LOG UNTUK DI POSTING: " + newLog);
 
