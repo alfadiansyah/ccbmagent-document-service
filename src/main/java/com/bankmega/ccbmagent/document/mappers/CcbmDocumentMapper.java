@@ -20,120 +20,113 @@ import com.bankmega.ccbmagent.document.model.responses.GetDocumentResponse;
 @Qualifier("sqlSessionTemplateMaster")
 public interface CcbmDocumentMapper {
 
-     @Insert
-     ("insert into"
-     	+ "	vtiger_crmentity("
-     		+ "	crmid,"
-     		+ "	smcreatorid,"
-     		+ "	smownerid, "
-     		+ "	setype,"
-     		+ "	description,"
-     		+ "	modifiedby,"
-     		+ "	createdtime,"
-     		+ "	modifiedtime "
-     	+ "	) values ("
-     		+ "	#{lastId},"
-     		+ "	#{userId},"
-     		+ "	#{assignTo},"
-     		+ "	'Documents',"
-     		+ "	NULL,"
-     		+ "	#{userIdLogin},"
-     		+ "	#{insertDate},"
-     		+ "	#{updateDate} "
-     	+ ");")
-     public void insertingData(
-    		 @Param("lastId") String lastId, 
-    		 @Param("userId") String userId, 
-    		 @Param("assignTo") String assignTo, 
-    		 @Param("userIdLogin") String userIdLogin, 
-    		 @Param("insertDate") String insertDate, 
-    		 @Param("updateDate") String updateDate 
+    @Insert("insert into"
+            + "	vtiger_crmentity("
+            + "	crmid,"
+            + "	smcreatorid,"
+            + "	smownerid, "
+            + "	setype,"
+            + "	description,"
+            + "	modifiedby,"
+            + "	createdtime,"
+            + "	modifiedtime "
+            + "	) values ("
+            + "	#{lastId},"
+            + "	#{userId},"
+            + "	#{assignTo},"
+            + "	'Documents',"
+            + "	NULL,"
+            + "	#{userIdLogin},"
+            + "	#{insertDate},"
+            + "	#{updateDate} "
+            + ");")
+    public void insertingData(
+            @Param("lastId") String lastId,
+            @Param("userId") String userId,
+            @Param("assignTo") String assignTo,
+            @Param("userIdLogin") String userIdLogin,
+            @Param("insertDate") String insertDate,
+            @Param("updateDate") String updateDate
     );
-     
-     @Insert
-     ("insert into"
-     	+ "	vtiger_notes("
-     		+ "	notesid, "
-     		+ "	title, "
-     		+ "	filename, "
-     		+ "	notecontent, "
-     		+ "	filelocationtype, "
-     		+ "	fileversion, "
-     		+ "	filestatus, "
-     		+ "	folderid, "
-     		+ "	note_no "
-     	+ "	) values( "
-     		+ "	#{lastId}, "
-     		+ "	#{requestTitle}, "
-     		+ "	NULL, "
-     		+ "	#{requestDescription}, "
-     		+ "	'I', "
-     		+ "	'', "
-     		+ "	#{requestStatus}, "
-     		+ "	#{requestFolderId}, "
-     		+ "	#{docSequence} "
-     	+ "	);")
-     public void insertDocumentToNotes(
-    		 @Param("lastId") String lastId, 
-    		 @Param("requestTitle") String requestTitle, 
-    		 @Param("requestDescription") String requestDescription, 
-    		 @Param("requestStatus") Boolean requestStatus, 
-    		 @Param("requestFolderId") String requestFolderId, 
-    		 @Param("docSequence") String docSequence 
+
+    @Insert("insert into"
+            + "	vtiger_notes("
+            + "	notesid, "
+            + "	title, "
+            + "	filename, "
+            + "	notecontent, "
+            + "	filelocationtype, "
+            + "	fileversion, "
+            + "	filestatus, "
+            + "	folderid, "
+            + "	note_no "
+            + "	) values( "
+            + "	#{lastId}, "
+            + "	#{requestTitle}, "
+            + "	NULL, "
+            + "	#{requestDescription}, "
+            + "	'I', "
+            + "	'', "
+            + "	#{requestStatus}, "
+            + "	#{requestFolderId}, "
+            + "	#{docSequence} "
+            + "	);")
+    public void insertDocumentToNotes(
+            @Param("lastId") String lastId,
+            @Param("requestTitle") String requestTitle,
+            @Param("requestDescription") String requestDescription,
+            @Param("requestStatus") Boolean requestStatus,
+            @Param("requestFolderId") String requestFolderId,
+            @Param("docSequence") String docSequence
     );
-     
-     @Insert
-     ("insert into"
-     	+ "	vtiger_senotesrel( "
-     		+ "	crmid, "
-     		+ "	notesid "
-     	+ "	) values ( "
-     		+ "	#{requestTicketId}, "
-     		+ "	#{lastId} "
-     	+ "	);")
-     public void insertDocumentToSenotesrel();
-     
-    @Update
-    ("update"
-    		+ "	vtiger_crmentity_seq "
-    	+ "set"
-    		+ "	id = LAST_INSERT_ID(id + 1);")
+
+    @Insert("insert into"
+            + "	vtiger_senotesrel( "
+            + "	crmid, "
+            + "	notesid "
+            + "	) values ( "
+            + "	#{requestTicketId}, "
+            + "	#{lastId} "
+            + "	);")
+    public void insertDocumentToSenotesrel();
+
+    @Update("update"
+            + "	vtiger_crmentity_seq "
+            + "set"
+            + "	id = LAST_INSERT_ID(id + 1);")
     public void updateLastId();
-    
-    @Update
-    ("update"
-    		+ "	vtiger_modentity_num "
-    	+ "set"
-    		+ "	cur_id = #{futureId} "
-    	+ "where"
-    		+ "	cur_id = #{pastId} "
-    	+ "and"
-    		+ "	active = 1 "
-    	+ "and"
-    		+ "	semodule = 'Documents';"
-    	+ "unlock tables;")
+
+    @Update("update"
+            + "	vtiger_modentity_num "
+            + "set"
+            + "	cur_id = #{futureId} "
+            + "where"
+            + "	cur_id = #{pastId} "
+            + "and"
+            + "	active = 1 "
+            + "and"
+            + "	semodule = 'Documents';"
+            + "unlock tables;")
     public void updateAndUnlockModentity(@Param("futureId") String futureId, @Param("pastId") String pastId);
-    
-    @Select
-    ("select"
-    		+ "	vcs.id as id "
-    	+ "from"
-    		+ "	vtigercrm54.vtiger_crmentity_seq vcs;")
+
+    @Select("select"
+            + "	vcs.id as id "
+            + "from"
+            + "	vtigercrm54.vtiger_crmentity_seq vcs;")
     public String ambilDataLastId();
-    
-    @Select
-    ("lock tables"
-    		+ "	vtiger_modentity_num "
-    	+ "write;"
-    	+ "select"
-    		+ "	cur_id as currentId,"
-    		+ "	prefix as prefix "
-    	+ "from"
-    		+ "	vtiger_modentity_num vmn "
-    	+ "where"
-    		+ "	semodule = 'Documents' "
-    	+ "and"
-    		+ "	active = 1;")
+
+    @Select("lock tables"
+            + "	vtiger_modentity_num "
+            + "write;"
+            + "select"
+            + "	cur_id as currentId,"
+            + "	prefix as prefix "
+            + "from"
+            + "	vtiger_modentity_num vmn "
+            + "where"
+            + "	semodule = 'Documents' "
+            + "and"
+            + "	active = 1;")
     public DataCurrent lockAndSelectCurrentId();
 
     @Select("select 3")
@@ -202,16 +195,31 @@ public interface CcbmDocumentMapper {
     @Update("UPDATE vtiger_notes set filedownloadcount= ${fileDownloadCount} where notesid= '${documentId}'")
     public void updateDocumentDownloadStatus(String documentId, Integer fileDownloadCount);
 
+    //Cek Ketersediaan data untuk delete document
+    @Select("SELECT count(*) as count FROM vtiger_senotesrel WHERE notesid = '${documentId}' AND crmid = '${ticketId}'")
+    public Integer findDocumentByDocumentIdAndTicketId(String documentId, String ticketId);
+
     //Delete document
-    @Delete("DELETE FROM vtiger_senotesrel WHERE notesid = '${notesId}' AND crmid = '${crmId}'")
-    public void deleteDocument(String notesId, String crmId);
+    @Delete("DELETE FROM vtiger_senotesrel WHERE notesid = '${documentId}' AND crmid = '${ticketId}'")
+    public void deleteDocumentByDocumentIdAndTicketId(String documentId, String ticketId);
 
     //Update document status
-    @Update("UPDATE vtiger_crmentity SET modifiedtime = '2024-08-26 13:59:18', modifiedby = '1' WHERE crmid = '${crmId}'")
-    public void updateDocumentStatus(String timeStamp, String crmId);
+    @Update("UPDATE vtiger_crmentity SET modifiedtime = '${timeStamp}', modifiedby = '${userId}' WHERE crmid = '${ticketId}'")
+    public void updateDocumentStatus(String timeStamp, String userId, String ticketId);
+
+    //Get log sebelumnya
+    @Select("SELECT update_log AS log FROM vtiger_troubletickets WHERE ticketId = '${ticketId}'")
+    public String getPreviousLogByTicketId(String ticketId);
 
     //set update log (detil log cek lagi di github)
-    @Update("UPDATE vtiger_troubletickets SET update_log = '${log}' WHERE ticketid = '${paramTicketId}'")
-    public void setUpdateLog(String log, String paramTicketId);
+    //log: [isi log sebelumnya + Document namafile was deleted [hari tanggal bulan tahun time AM/PM] by [paramUserId]]
+    @Update("UPDATE vtiger_troubletickets SET update_log = '${log}' WHERE ticketid = '${ticketId}'")
+    public void setUpdateLog(String log, String ticketId);
+
+    @Select("SELECT filename as filename FROM vtiger_notes WHERE notesid = '${documentId}'")
+    public String getFileNameByDocumentId(String documentId);
+
+    @Select("SELECT user_name as userName FROM vtiger_users WHERE id = '${userId}'")
+    public String getUserNameByUserId(String userId);
 
 }

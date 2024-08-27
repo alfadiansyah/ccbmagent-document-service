@@ -11,8 +11,6 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -22,13 +20,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bankmega.ccbmagent.document.model.requests.DeleteDocumentRequest;
 import com.bankmega.ccbmagent.document.model.requests.DownloadDocumentRequest;
 import com.bankmega.ccbmagent.document.model.requests.GetDocumentRequest;
-
-import com.bankmega.ccbmagent.document.model.responses.ApiResponse;
-import com.bankmega.ccbmagent.document.services.CcbmDocumentService;
-
 import com.bankmega.ccbmagent.document.model.requests.InsertDocumentRequest;
+import com.bankmega.ccbmagent.document.model.responses.ApiResponse;
 import com.bankmega.ccbmagent.document.services.CcbmDocumentService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,12 +41,11 @@ public class CcbmDocumentController {
     @Autowired
     private HttpServletRequest requestHeader;
 
-     @PostMapping(value = "/ccbm/document/insert")
-     public ResponseEntity<?> insertDocument(@ModelAttribute InsertDocumentRequest request) {
-     	return ResponseEntity.status(HttpStatus.OK).body(service.insertingDocument(request));
-     }
-     
-     
+    @PostMapping(value = "/ccbm/document/insert")
+    public ResponseEntity<?> insertDocument(@ModelAttribute InsertDocumentRequest request) {
+        return ResponseEntity.status(HttpStatus.OK).body(service.insertingDocument(request));
+    }
+
     @GetMapping("/test")
     public String getTest() {
         return "Test Success";
@@ -76,7 +71,7 @@ public class CcbmDocumentController {
 
     @PostMapping("/download")
     @JsRequestBodyValidation
-    public ResponseEntity<InputStreamResource>  downloadDocument(@RequestBody DownloadDocumentRequest request) throws Throwable {
+    public ResponseEntity<InputStreamResource> downloadDocument(@RequestBody DownloadDocumentRequest request) throws Throwable {
         System.out.println("DOCUMENT ID: " + request.getDocumentId());
         return service.downloadDocument(request);
     }
@@ -103,6 +98,12 @@ public class CcbmDocumentController {
             System.out.println(e.getMessage());
         }
         return ResponseEntity.internalServerError().build();
+    }
+
+    @PostMapping("/delete")
+    @JsRequestBodyValidation
+    public ResponseEntity<ApiResponse> deleteDocument(@RequestBody DeleteDocumentRequest request) {
+        return service.deleteDocument(request);
     }
 
 }
