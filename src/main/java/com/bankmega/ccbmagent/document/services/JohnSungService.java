@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 import com.bankmega.ccbmagent.document.components.FileComponent;
 import com.bankmega.ccbmagent.document.components.ResponseGenerator;
 import com.bankmega.ccbmagent.document.mappers.JohnSungMapper;
+import com.bankmega.ccbmagent.document.components.StringComponent;
+import com.bankmega.ccbmagent.document.components.TimeComponent;
+import com.bankmega.ccbmagent.document.model.requests.DeleteDocumentRequest;
 import com.bankmega.ccbmagent.document.model.requests.DownloadDocumentRequest;
 import com.bankmega.ccbmagent.document.model.responses.ApiResponse;
 import com.bankmega.ccbmagent.document.model.responses.CheckIsDocumentDeletedResponse;
@@ -32,25 +35,34 @@ public class JohnSungService {
 	@Autowired
 	private FileComponent file;
 	
-	public ResponseEntity<ApiResponse> getDocument(String ticketId) {
+	@Autowired
+	private TimeComponent time;
+	
+	@Autowired
+	private StringComponent stringComponent;
+	
+    public ResponseEntity<ApiResponse> getDocument(String ticketId) {
         List<GetDocumentResponse> result = mapper.getListDocument(ticketId);
 
         if (result == null || result.size() < 1) {
-            throw new JsException("404", "NOT FOUND", HttpStatus.BAD_REQUEST);
+            throw new JsException("404", "NOT FOUND", HttpStatus.NOT_FOUND);
         }
 
         return response.success(result, "00", "Sukses Mendapatkan List Document");
     }
 
     public ResponseEntity<InputStreamResource> downloadDocument(DownloadDocumentRequest request) {
-        CheckIsDocumentDeletedResponse isDeleted = mapper.checkIsDocumentDeleted(request.getDocumentId());
 
-        System.out.println("CHECK DOCUMENT DELETED STATUS: " + isDeleted);
+        //MEMASTIKAN STATUS DOKUMEN BELUM TERDELETE
+        CheckIsDocumentDeletedResponse documentDeletedResponse = mapper.checkIsDocumentDeleted(request.getDocumentId());
 
-        if (isDeleted.equals(1)) {
+        System.out.println("CHECK DOCUMENT DELETED STATUS: " + documentDeletedResponse);
+
+        if (documentDeletedResponse.getDeleted().equals(1)) {
             throw new JsException("404", "Dokumen Sudah Dihapus", HttpStatus.NO_CONTENT);
         }
 
+        //MENDAPATKAN LOKASI DOKUMEN
         GetDocumentLocationResponse documentLocation = mapper.getDocumentLocation(request.getDocumentAttachmentId());
 
         System.out.println("DOCUMENT LOCATION: " + documentLocation);
@@ -61,6 +73,7 @@ public class JohnSungService {
 
         System.out.println("SUKSES MENDAPATKAN LOKASI, MENCOBA DOWNLOAD DOKUMEN");
 
+        //MENDAPATKAN DOWNLOAD COUNT UNTUK DI UPDATE
         GetDocumentDownloadCountResponse downloadCount = mapper.getDocumentDownloadCount(request.getDocumentId());
 
         System.out.println("DOWNLOAD COUNT: " + downloadCount);
@@ -69,6 +82,7 @@ public class JohnSungService {
             throw new JsException("404", "File Tidak Terdaftar di tabel download, Tidak ada dokumen dengan ID: " + request.getDocumentId(), HttpStatus.OK);
         }
 
+        //UPDATE DOWNLOAD COUNT
         Integer updatedFileDownloadCount = downloadCount.getFileDownloadCount() + 1;
         mapper.updateDocumentDownloadStatus(request.getDocumentId(), updatedFileDownloadCount);
 
@@ -77,6 +91,58 @@ public class JohnSungService {
         System.out.println("MENCOBA DOWNLOAD FILE");
 
         String generatedDocumentLocation = documentLocation.generatePathLocation();
+
+        //RETURN FILE
         return file.downloadFrom(generatedDocumentLocation);
     }
+
+    public ResponseEntity<ApiResponse> deleteDocument(DeleteDocumentRequest request) {
+
+        //CEK KETERSEDIAAN DATA
+        Integer isDocumentAvailable = mapper.findDocumentByDocumentIdAndTicketId(request.getDocumentId(), request.getTicketId());
+        System.out.println("ISDOCUMENTAVAILABLE: " + isDocumentAvailable);
+        if (isDocumentAvailable == null || isDocumentAvailable.equals(0)) {
+            throw new JsException("404", "NOT FOUND", HttpStatus.NOT_FOUND);
+        }
+
+        //DELETE DOKUMEN
+        mapper.deleteDocumentByDocumentIdAndTicketId(request.getDocumentId(), request.getTicketId());
+
+        //UPDATE STATUS DOKUMEN
+        mapper.updateDocumentStatus(time.getTimeStamp(), request.getUserId(), request.getTicketId());
+
+        //GET LOG SEBELUMNYA
+        String previousLog = mapper.getDocumentLogPreviousLogByTicketId(request.getTicketId());
+        if (previousLog == null) {
+            System.out.println("TIDAK DAPAT DITEMUKAN LOG SEBELUMNYA UNTUK TICKETID: " + request.getTicketId());
+            previousLog = "";
+        }
+
+        //Get Document File Name
+        String documentFileName = mapper.getDocumentFileNameByDocumentId(request.getDocumentId());
+        if (documentFileName == null) {
+            System.out.println("TIDAK ADA DOKUMEN DENGAN DOCUMENTID: " + request.getDocumentId());
+            documentFileName = "DOCUMENT NOT FOUND";
+        }
+
+        //GET USERNAME
+        String userName = mapper.getUserNameByUserId(request.getUserId());
+        if (userName == null) {
+            System.out.println("TIDAK ADA USERNAME DENGAN userID: " + request.getUserId());
+            userName = "USERNAME NOT FOUND";
+        }
+
+        //SET LOG DENGAN FORMAT: [[isi log sebelumnya] + [Document namafile] was deleted [hari tanggal bulan tahun time AM/PM] by [userName]]
+        String newLog = stringComponent.joinStringWithSpace(new String[]{previousLog, "Document", documentFileName, "was deleted", time.getTimeStamp(), "by", userName});
+        newLog = newLog + "--//--";
+
+        System.out.println("LOG UNTUK DI POSTING: " + newLog);
+
+        // INSERT NEW LOG TO DB
+        mapper.setDocumentUpdateLog(newLog, request.getTicketId());
+
+        System.out.println("SUKSES MENGHAPUS DOKUMEN DENGAN ID: " + request.getDocumentId() + " DAN TICKETID: " + request.getTicketId());
+        return response.success(null, "00", "Sukses Menghapus Dokumen");
+    }
+
 }
