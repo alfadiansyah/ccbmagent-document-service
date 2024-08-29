@@ -2,7 +2,6 @@ package com.bankmega.ccbmagent.document.mappers;
 
 import java.util.List;
 
-import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -12,131 +11,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import com.bankmega.ccbmagent.document.model.responses.CheckIsDocumentDeletedResponse;
 import com.bankmega.ccbmagent.document.model.responses.GetDocumentDownloadCountResponse;
 import com.bankmega.ccbmagent.document.model.responses.GetDocumentLocationResponse;
-import com.bankmega.ccbmagent.document.model.responses.DataCurrent;
 import com.bankmega.ccbmagent.document.model.responses.GetDocumentResponse;
 
 @Mapper
 @Qualifier("sqlSessionTemplateMaster")
-public interface CcbmDocumentMapper {
+public interface JohnSungMapper {
 
-     @Insert
-     ("insert into"
-     	+ "	vtiger_crmentity("
-     		+ "	crmid,"
-     		+ "	smcreatorid,"
-     		+ "	smownerid, "
-     		+ "	setype,"
-     		+ "	description,"
-     		+ "	modifiedby,"
-     		+ "	createdtime,"
-     		+ "	modifiedtime "
-     	+ "	) values ("
-     		+ "	#{lastId},"
-     		+ "	#{userId},"
-     		+ "	#{assignTo},"
-     		+ "	'Documents',"
-     		+ "	NULL,"
-     		+ "	#{userIdLogin},"
-     		+ "	#{insertDate},"
-     		+ "	#{updateDate} "
-     	+ ");")
-     public void insertingData(
-    		 @Param("lastId") String lastId, 
-    		 @Param("userId") String userId, 
-    		 @Param("assignTo") String assignTo, 
-    		 @Param("userIdLogin") String userIdLogin, 
-    		 @Param("insertDate") String insertDate, 
-    		 @Param("updateDate") String updateDate 
-    );
-     
-     @Insert
-     ("insert into"
-     	+ "	vtiger_notes("
-     		+ "	notesid, "
-     		+ "	title, "
-     		+ "	filename, "
-     		+ "	notecontent, "
-     		+ "	filelocationtype, "
-     		+ "	fileversion, "
-     		+ "	filestatus, "
-     		+ "	folderid, "
-     		+ "	note_no "
-     	+ "	) values( "
-     		+ "	#{lastId}, "
-     		+ "	#{requestTitle}, "
-     		+ "	NULL, "
-     		+ "	#{requestDescription}, "
-     		+ "	'I', "
-     		+ "	'', "
-     		+ "	#{requestStatus}, "
-     		+ "	#{requestFolderId}, "
-     		+ "	#{docSequence} "
-     	+ "	);")
-     public void insertDocumentToNotes(
-    		 @Param("lastId") String lastId, 
-    		 @Param("requestTitle") String requestTitle, 
-    		 @Param("requestDescription") String requestDescription, 
-    		 @Param("requestStatus") Boolean requestStatus, 
-    		 @Param("requestFolderId") String requestFolderId, 
-    		 @Param("docSequence") String docSequence 
-    );
-     
-     @Insert
-     ("insert into"
-     	+ "	vtiger_senotesrel( "
-     		+ "	crmid, "
-     		+ "	notesid "
-     	+ "	) values ( "
-     		+ "	#{requestTicketId}, "
-     		+ "	#{lastId} "
-     	+ "	);")
-     public void insertDocumentToSenotesrel();
-     
-    @Update
-    ("update"
-    		+ "	vtiger_crmentity_seq "
-    	+ "set"
-    		+ "	id = LAST_INSERT_ID(id + 1);")
-    public void updateLastId();
-    
-    @Update
-    ("update"
-    		+ "	vtiger_modentity_num "
-    	+ "set"
-    		+ "	cur_id = #{futureId} "
-    	+ "where"
-    		+ "	cur_id = #{pastId} "
-    	+ "and"
-    		+ "	active = 1 "
-    	+ "and"
-    		+ "	semodule = 'Documents';"
-    	+ "unlock tables;")
-    public void updateAndUnlockModentity(@Param("futureId") String futureId, @Param("pastId") String pastId);
-    
-    @Select
-    ("select"
-    		+ "	vcs.id as id "
-    	+ "from"
-    		+ "	vtigercrm54.vtiger_crmentity_seq vcs;")
-    public String ambilDataLastId();
-    
-    @Select
-    ("lock tables"
-    		+ "	vtiger_modentity_num "
-    	+ "write;"
-    	+ "select"
-    		+ "	cur_id as currentId,"
-    		+ "	prefix as prefix "
-    	+ "from"
-    		+ "	vtiger_modentity_num vmn "
-    	+ "where"
-    		+ "	semodule = 'Documents' "
-    	+ "and"
-    		+ "	active = 1;")
-    public DataCurrent lockAndSelectCurrentId();
-
-    @Select("select 3")
-    String test();
+	@Select("select 3")
+    public String test();
 
     @Select(
             "SELECT "

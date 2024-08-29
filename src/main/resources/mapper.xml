@@ -1,0 +1,13 @@
+<mapper namespace="com.bankmega.ccbmagent.document.mappers">
+
+    <!-- Lock the table -->
+    <select id="lockTable" parameterType="String">
+        LOCK TABLES ${tableName} WRITE
+    </select>
+
+    <!-- Unlock the table -->
+    <update id="unlockTables">
+        UNLOCK TABLES
+    </update>
+
+</mapper>
