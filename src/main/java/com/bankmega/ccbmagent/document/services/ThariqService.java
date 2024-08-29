@@ -212,7 +212,7 @@ public class ThariqService {
     	// bikin directory untuk menampung file yg diupload
     	
     	Object result = null;
-//    	try {
+    	try {
     		if (file.getFile().getSize() > 3000000) {
     			result = new ApiResponse("400", "File size is too big", false);
     			log.info("file size: " + file.getFile().getSize());
@@ -230,10 +230,10 @@ public class ThariqService {
     		// penamaan file ({lastIdSec}_{fileName}
     		file.getFile().transferTo(directory);
     		result = new ApiResponse("00", "OK", true);
-//    	} catch (IOException e) {
-//    		log.error("ERROR: " + e.getMessage());
-//    		e.printStackTrace();
-//    	}
+    	} catch (IOException e) {
+    		log.error("ERROR: " + e.getMessage());
+    		e.printStackTrace();
+    	}
     	return result;
     }
 
