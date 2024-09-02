@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bankmega.ccbmagent.document.model.requests.DeleteDocumentRequest;
 import com.bankmega.ccbmagent.document.model.requests.DownloadDocumentRequest;
 import com.bankmega.ccbmagent.document.model.requests.GetDocumentRequest;
 import com.bankmega.ccbmagent.document.model.responses.ApiResponse;
@@ -89,6 +90,12 @@ public class JohnSungController {
 			System.out.println(e.getMessage());
 		}
 		return ResponseEntity.internalServerError().build();
+	}
+
+	@PostMapping("/delete")
+	@JsRequestBodyValidation
+	public ResponseEntity<ApiResponse> deleteDocument(@RequestBody DeleteDocumentRequest request) {
+			return service.deleteDocument(request);
 	}
 
 }
