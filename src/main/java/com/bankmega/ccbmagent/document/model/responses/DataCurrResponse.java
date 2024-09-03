@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DataCurrent {
+public class DataCurrResponse {
 
 	private String currentId;
 	private String prefix;

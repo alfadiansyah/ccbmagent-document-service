@@ -2,6 +2,7 @@ package com.bankmega.ccbmagent.document.mappers;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -82,5 +83,32 @@ public interface JohnSungMapper {
     //jumlah count +1 update kesini
     @Update("UPDATE vtiger_notes set filedownloadcount= ${fileDownloadCount} where notesid= '${documentId}'")
     public void updateDocumentDownloadStatus(String documentId, Integer fileDownloadCount);
+
+    //Cek Ketersediaan data untuk delete document
+    @Select("SELECT count(*) as count FROM vtiger_senotesrel WHERE notesid = '${documentId}' AND crmid = '${ticketId}'")
+    public Integer findDocumentByDocumentIdAndTicketId(String documentId, String ticketId);
+
+    //Delete document
+    @Delete("DELETE FROM vtiger_senotesrel WHERE notesid = '${documentId}' AND crmid = '${ticketId}'")
+    public void deleteDocumentByDocumentIdAndTicketId(String documentId, String ticketId);
+
+    //Update document status
+    @Update("UPDATE vtiger_crmentity SET modifiedtime = '${timeStamp}', modifiedby = '${userId}' WHERE crmid = '${ticketId}'")
+    public void updateDocumentStatus(String timeStamp, String userId, String ticketId);
+
+    //Get log sebelumnya
+    @Select("SELECT update_log AS log FROM vtiger_troubletickets WHERE ticketId = '${ticketId}'")
+    public String getDocumentLogPreviousLogByTicketId(String ticketId);
+
+    //set update log (detil log cek lagi di github)
+    //log: [isi log sebelumnya + Document namafile was deleted [hari tanggal bulan tahun time AM/PM] by [paramUserId]]
+    @Update("UPDATE vtiger_troubletickets SET update_log = '${log}' WHERE ticketid = '${ticketId}'")
+    public void setDocumentUpdateLog(String log, String ticketId);
+
+    @Select("SELECT filename as filename FROM vtiger_notes WHERE notesid = '${documentId}'")
+    public String getDocumentFileNameByDocumentId(String documentId);
+
+    @Select("SELECT user_name as userName FROM vtiger_users WHERE id = '${userId}'")
+    public String getUserNameByUserId(String userId);
 
 }

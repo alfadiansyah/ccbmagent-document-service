@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import com.bankmega.ccbmagent.document.mappers.ThariqMapper;
 import com.bankmega.ccbmagent.document.model.responses.ApiResponse;
 import com.bankmega.ccbmagent.document.model.requests.InsertDocumentRequest;
-import com.bankmega.ccbmagent.document.model.responses.DataCurrent;
+import com.bankmega.ccbmagent.document.model.responses.DataCurrResponse;
 
 @Service
 public class ThariqService {
@@ -116,7 +116,7 @@ public class ThariqService {
         		// 5.1 lock table modentity and select cur_id and prefix
         		log.info("lock table and select");
         		mapper.lockTable("vtiger_modentity_num");
-        		DataCurrent data = mapper.selectCurrentId();
+        		DataCurrResponse data = mapper.selectCurrentId();
         		
         		String pastCurId = data.getCurrentId();
         		Integer futureCurId = Integer.parseInt(pastCurId) + 1;
@@ -212,7 +212,7 @@ public class ThariqService {
     	// bikin directory untuk menampung file yg diupload
     	
     	Object result = null;
-//    	try {
+    	try {
     		if (file.getFile().getSize() > 3000000) {
     			result = new ApiResponse("400", "File size is too big", false);
     			log.info("file size: " + file.getFile().getSize());
@@ -230,10 +230,10 @@ public class ThariqService {
     		// penamaan file ({lastIdSec}_{fileName}
     		file.getFile().transferTo(directory);
     		result = new ApiResponse("00", "OK", true);
-//    	} catch (IOException e) {
-//    		log.error("ERROR: " + e.getMessage());
-//    		e.printStackTrace();
-//    	}
+    	} catch (IOException e) {
+    		log.error("ERROR: " + e.getMessage());
+    		e.printStackTrace();
+    	}
     	return result;
     }
 
