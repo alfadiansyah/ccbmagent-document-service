@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import com.bankmega.ccbmagent.document.mappers.ThariqMapper;
 import com.bankmega.ccbmagent.document.model.responses.ApiResponse;
 import com.bankmega.ccbmagent.document.model.requests.InsertDocumentRequest;
-import com.bankmega.ccbmagent.document.model.responses.DataCurrent;
+import com.bankmega.ccbmagent.document.model.responses.DataCurrResponse;
 
 @Service
 public class ThariqService {
@@ -116,7 +116,7 @@ public class ThariqService {
         		// 5.1 lock table modentity and select cur_id and prefix
         		log.info("lock table and select");
         		mapper.lockTable("vtiger_modentity_num");
-        		DataCurrent data = mapper.selectCurrentId();
+        		DataCurrResponse data = mapper.selectCurrentId();
         		
         		String pastCurId = data.getCurrentId();
         		Integer futureCurId = Integer.parseInt(pastCurId) + 1;

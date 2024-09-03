@@ -8,7 +8,7 @@ import org.apache.ibatis.annotations.SelectProvider;
 import org.apache.ibatis.annotations.UpdateProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import com.bankmega.ccbmagent.document.model.responses.DataCurrent;
+import com.bankmega.ccbmagent.document.model.responses.DataCurrResponse;
 
 @Mapper
 @Qualifier("sqlSessionTemplateMaster")
@@ -239,7 +239,7 @@ public interface ThariqMapper {
 	public void lockTable(@Param("tableName") String tableName);
 
 	@SelectProvider(type = Query.class, method = "selectCurrentId")
-	public DataCurrent selectCurrentId();
+	public DataCurrResponse selectCurrentId();
 
 	@UpdateProvider(type = Query.class, method = "updateCurrentId")
 	public void updateCurrentId(String pastCurId, String futureCurId);

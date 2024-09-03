@@ -32,8 +32,4 @@ directory:
 #  path-name:  C://Users/23020229/Desktop/
   path-name:  /data/document-service/
   
-#mybatis:
-#  configuration:  
-#    map-underscore-to-camel-case: true
-#  mapper-locations:
-#  - "classpath:/mapper.xml"
+
