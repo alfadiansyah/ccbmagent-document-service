@@ -63,37 +63,3 @@ public class IpBasedAccessFilter extends OncePerRequestFilter {
     }
 }
 
-// public class IpBasedAccessFilter extends OncePerRequestFilter {
-
-//     private final IpBasedAccessService ipService;
-
-//     public IpBasedAccessFilter(IpBasedAccessService ipService) {
-//         this.ipService = ipService;
-//     }
-
-//     @Override
-//     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-//             throws ServletException, IOException {
-//         String remoteIp = request.getRemoteAddr();
-//         System.out.println("Original IP: " + remoteIp); // Log the original IP for debugging
-
-//         // Handle localhost addresses (IPv4 and IPv6)
-//         if ("0:0:0:0:0:0:0:1".equals(remoteIp) || "127.0.0.1".equals(remoteIp)) {
-//             try {
-//                 // Replace with the IP of a specific network interface, e.g., "wlp3s0"
-//                 remoteIp = IpBasedAccessUtil.getLocalIpAddressForInterface("wlp3s0");
-//             } catch (SocketException e) {
-//                 e.printStackTrace();
-//                 remoteIp = "unknown";
-//             }
-//         }
-
-//         System.out.println("Effective IP: " + remoteIp); // Log the effective IP address for debugging
-
-//         if (ipService.isIpWhitelisted(remoteIp)) {
-//             filterChain.doFilter(request, response);
-//         } else {
-//             response.sendError(HttpServletResponse.SC_FORBIDDEN, "IP Address not whitelisted");
-//         }
-//     }    
-// }
