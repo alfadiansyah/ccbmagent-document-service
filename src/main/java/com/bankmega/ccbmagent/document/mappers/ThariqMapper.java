@@ -31,7 +31,7 @@ public interface ThariqMapper {
 						+ " id "
 					+ "from"
 						+ " vtiger_crmentity_seq;";
-			}
+		}
 
 		// step 4: inserting document to crmentity
 		public String insertDocumentToCrmentity(Integer lastId, Integer userId, Integer assignTo) {
