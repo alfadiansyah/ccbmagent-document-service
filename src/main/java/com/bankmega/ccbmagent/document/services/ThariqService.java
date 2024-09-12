@@ -96,7 +96,6 @@ public class ThariqService {
         		fileName = request.getFile().getOriginalFilename().replaceAll(" ", "_");
         		fileType = request.getFile().getContentType();
         		fileSize = request.getFile().getSize();
-        		path = path + dateFormatting(); // formatting date is needed
         		
         		// step 3: updating id sequence and set to temp variable {lastId}
         		// 3.1 update last sequence id
@@ -129,7 +128,7 @@ public class ThariqService {
         		// step 6: insert and update document into tb notes and senotesrel
         		// 6.1 insert document to notes
         		log.info("insert document to notes");
-        		mapper.insertDocumentToNotes(lastId, title, description, status, folderId, "DOC" + description);
+        		mapper.insertDocumentToNotes(lastId, title, description, status, folderId, "DOC" + pastCurId);
         		
         		// 6.2 insert document notes to notesrel
         		mapper.insertDocumentNotes(ticketId, lastId);
@@ -172,7 +171,7 @@ public class ThariqService {
         		
         		// bikin directory untuk menampung file yg diupload
         	
-        		File directory = new File(path + lastIdSec + "_" + fileName);
+        		File directory = new File(path + dateFormatting() + lastIdSec + "_" + fileName);
         		log.info("directory: " + directory.exists());
         		if (!directory.exists()) {
         			log.info("membuat directory");
@@ -218,9 +217,9 @@ public class ThariqService {
     			log.info("file size: " + file.getFile().getSize());
     			return result;
     		}
-    		path =  path + dateFormatting();
+//    		path =  path + dateFormatting();
     		log.info("path: " + path);
-    		File directory = new File(path + file.getFile().getOriginalFilename());
+    		File directory = new File(path + dateFormatting() + file.getFile().getOriginalFilename());
     		log.info("directory: " + directory.exists());
     		if (!directory.exists()) {
     			log.info("membuat directory");
