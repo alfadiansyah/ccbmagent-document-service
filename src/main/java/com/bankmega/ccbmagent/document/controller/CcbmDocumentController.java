@@ -21,7 +21,6 @@ import com.bankmega.ccbmagent.document.model.requests.UpdateDocumentRequest;
 import com.bankmega.ccbmagent.document.services.CcbmDocumentService;
 import com.bankmega.ccbmagent.document.services.UpdateCcbmDocumentService;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.servlet.http.HttpServletRequest;
 import mampang.validation.annotation.JsRequestBodyValidation.JsRequestBodyValidation;
 import mampang.validation.dto.MampangApiResponse;

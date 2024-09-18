@@ -62,7 +62,8 @@
 		</dependency>
 
 		<dependency>
-			<artifactId>mampang</artifactId>
+			<groupId>com.github.johnsungjs</groupId>
+			<artifactId>projectmampang</artifactId>
 			<version>1.0.6</version>
 		</dependency>
 	</dependencies>
