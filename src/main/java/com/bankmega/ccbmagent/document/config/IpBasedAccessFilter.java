@@ -25,12 +25,10 @@ public class IpBasedAccessFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         String remoteIp = getClientIp(request);
-        System.out.println("Original IP: " + remoteIp); // Log the original IP for debugging
+        System.out.println("Original IP: " + remoteIp); 
 
-        // Handle localhost addresses (IPv4 and IPv6)
         if ("0:0:0:0:0:0:0:1".equals(remoteIp) || "127.0.0.1".equals(remoteIp)) {
             try {
-                // Replace with the IP of a specific network interface, e.g., "wlp3s0"
                 remoteIp = IpBasedAccessUtil.getLocalIpAddressForInterface("wlp3s0");
             } catch (SocketException e) {
                 e.printStackTrace();
@@ -38,7 +36,7 @@ public class IpBasedAccessFilter extends OncePerRequestFilter {
             }
         }
 
-        System.out.println("Effective IP: " + remoteIp); // Log the effective IP address for debugging
+        System.out.println("Effective IP: " + remoteIp); 
 
         if (ipService.isIpWhitelisted(remoteIp)) {
             filterChain.doFilter(request, response);
@@ -55,7 +53,6 @@ public class IpBasedAccessFilter extends OncePerRequestFilter {
         if (ipAddress == null || ipAddress.isEmpty()) {
             ipAddress = request.getRemoteAddr();
         }
-        // X-Forwarded-For can contain multiple IPs, the first one is usually the client IP
         if (ipAddress != null && ipAddress.contains(",")) {
             ipAddress = ipAddress.split(",")[0].trim();
         }
