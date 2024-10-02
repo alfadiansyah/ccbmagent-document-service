@@ -41,6 +41,7 @@ public interface JohnSungMapper {
             + "    vtiger_seattachmentsrel.attachmentsid AS attachmentSid,"
             + "    vtiger_notes.notesid AS crmId,"
             + "    vtiger_notes.notecontent AS description,"
+            + "    vaf.foldername,"
             + "    vtiger_notes.*  "
             + "FROM"
             + "  vtiger_notes "
@@ -64,6 +65,8 @@ public interface JohnSungMapper {
             + "  vtiger_seattachmentsrel.attachmentsid = vtiger_attachments.attachmentsid "
             + "LEFT JOIN "
             + "  vtiger_users ON vtiger_crmentity.smownerid = vtiger_users.id "
+            + "LEFT JOIN "
+            + "  vtiger_attachmentsfolder vaf ON vtiger_notes.folderid = vaf.folderid "
             + "WHERE"
             + "  crm2.crmid = ${paramTicketId}"
     )
