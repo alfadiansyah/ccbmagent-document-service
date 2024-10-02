@@ -41,7 +41,7 @@ public interface JohnSungMapper {
             + "    vtiger_seattachmentsrel.attachmentsid AS attachmentSid,"
             + "    vtiger_notes.notesid AS crmId,"
             + "    vtiger_notes.notecontent AS description,"
-            + "    vaf.foldername,"
+            + "    vaf.foldername AS folderName,"
             + "    vtiger_notes.*  "
             + "FROM"
             + "  vtiger_notes "
