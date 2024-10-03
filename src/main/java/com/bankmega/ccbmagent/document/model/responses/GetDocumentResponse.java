@@ -1,7 +1,5 @@
 package com.bankmega.ccbmagent.document.model.responses;
 
-import org.springframework.web.multipart.MultipartFile;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class GetDocumentResponse {
   private String userName;
   private String activityType;
-  private MultipartFile fileType;
+  private String fileType;
   private String path;
   private String lastModified;
   private String modifiedTime;
