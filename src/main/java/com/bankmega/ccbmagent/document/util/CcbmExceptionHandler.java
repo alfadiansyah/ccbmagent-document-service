@@ -9,13 +9,18 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.bankmega.ccbmagent.document.model.responses.ApiResponse;
 
+import lombok.extern.slf4j.Slf4j;
 import mampang.validation.exception.JsException;
 
 @ControllerAdvice
+@Slf4j
 public class CcbmExceptionHandler {
 
     @ExceptionHandler(JsException.class)
     public ResponseEntity<ApiResponse> handleJsExceptionCcbm(JsException e) {
+
+        log.info("CUSTOM EXCEPTION MESSAGE: "+e.getMessage());
+
         return ResponseEntity
                 .status(e.getHttpStatus())
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -24,7 +29,7 @@ public class CcbmExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse> handleExceptionCcbm(Exception e) {
-        System.out.println("UNHANDLED EXCEPTION: " + e.getMessage());
+        log.info("UNHANDLED EXCEPTION: " + e.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
