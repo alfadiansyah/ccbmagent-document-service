@@ -37,6 +37,7 @@ public class CcbmDocumentService {
 	private static final Logger logger = LoggerFactory.getLogger(CcbmDocumentService.class);
 
 
+
     public Object insertingDocument(InsertDocumentRequest request) {
     	String fileName = "";
     	String fileType = "";
@@ -84,6 +85,7 @@ public class CcbmDocumentService {
 
         return null;
     }
+	
 
     public HttpEntity<MampangApiResponse> getDocument(String ticketId) {
         Object result = mapper.getListDocument(ticketId);

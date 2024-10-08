@@ -30,8 +30,8 @@ public class SecurityConfig {
                 )
                 .csrf(csrf -> csrf.disable()) // Disable CSRF for simplicity; enable in production
                 .formLogin(form -> form.disable()) // Default form login setup
-                .httpBasic(httpBasic -> httpBasic.disable())
-                .addFilterBefore(new IpBasedAccessFilter(ipService),UsernamePasswordAuthenticationFilter.class); 
+                .httpBasic(httpBasic -> httpBasic.disable());
+                // .addFilterBefore(new IpBasedAccessFilter(ipService),UsernamePasswordAuthenticationFilter.class); 
 
         return http.build();
     }

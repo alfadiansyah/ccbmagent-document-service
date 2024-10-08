@@ -271,6 +271,7 @@ public interface CcbmDocumentMapper {
         + "WHERE"
         + "  crm2.crmid = ${paramTicketId}"
     )
+    
     List<GetDocumentResponse> getListDocument(@Param("paramTicketId") String paramTicketId);
 
     @Select("SELECT folderid, foldername FROM vtiger_attachmentsfolder ORDER BY foldername ASC")
