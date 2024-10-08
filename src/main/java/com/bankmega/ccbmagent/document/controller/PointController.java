@@ -9,7 +9,7 @@ import com.bankmega.ccbmagent.document.model.responses.PointAuthResponse;
 import com.bankmega.ccbmagent.document.services.PointService;
 
 @RestController
-@RequestMapping("/ccbm/document/user/point-service")
+@RequestMapping("/user/point-service")
 public class PointController {
 
     @Autowired
@@ -21,6 +21,7 @@ public class PointController {
         return ResponseEntity.ok(response);
     }
 
+    // New endpoint for pagination
     @PostMapping("/history")
     public ResponseEntity<PointAuthResponse> getHistoryPoints(@RequestBody PointAuthRequest request) throws Exception {
         PointAuthResponse response = pointService.getHistoryPoints(request.getAccessToken(), request.getPhoneNo(), request.getCurrentPage());
