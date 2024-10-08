@@ -4,19 +4,28 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.URL;
+import java.util.Enumeration;
 
 public class IpBasedAccessUtil {
-    public static String getLocalIpAddress() {
-        try {
-            InetAddress inetAddress = InetAddress.getLocalHost();
-            return inetAddress.getHostAddress();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "unknown";
+    public static String getLocalIpAddressForInterface(String interfaceName) throws SocketException {
+        Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+        while (interfaces.hasMoreElements()) {
+            NetworkInterface networkInterface = interfaces.nextElement();
+            if (networkInterface.getName().equalsIgnoreCase(interfaceName)) {
+                Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    InetAddress address = addresses.nextElement();
+                    if (address.isSiteLocalAddress()) {
+                        return address.getHostAddress();
+                    }
+                }
+            }
         }
+        throw new SocketException("No local IP address found for the specified network interface.");
     }
-
     // Method to get the public IP address
     public static String getPublicIpAddress() {
         String publicIp = "unknown";

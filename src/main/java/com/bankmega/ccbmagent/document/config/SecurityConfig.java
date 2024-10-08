@@ -24,17 +24,14 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/ccbm/document/**").permitAll() // Allow unrestricted access for other
-                        // endpoints
+                        .requestMatchers("/ccbm/document/**").permitAll() // Allow unrestricted access for specific endpoints
                         .anyRequest().authenticated() // Require authentication for all other requests
                 )
                 .csrf(csrf -> csrf.disable()) // Disable CSRF for simplicity; enable in production
                 .formLogin(form -> form.disable()) // Default form login setup
-                .httpBasic(httpBasic -> httpBasic.disable());
-                // .addFilterBefore(new IpBasedAccessFilter(ipService),UsernamePasswordAuthenticationFilter.class); 
+                .httpBasic(httpBasic -> httpBasic.disable())
+                .addFilterBefore(new IpBasedAccessFilter(ipService), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-
-    
 }
