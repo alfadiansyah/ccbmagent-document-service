@@ -25,7 +25,6 @@ import com.bankmega.ccbmagent.document.model.requests.GetDocumentRequest;
 import com.bankmega.ccbmagent.document.model.responses.ApiResponse;
 import com.bankmega.ccbmagent.document.services.JohnSungService;
 
-import jakarta.servlet.http.HttpServletRequest;
 import mampang.validation.annotation.JsRequestBodyValidation.JsRequestBodyValidation;
 import mampang.validation.exception.JsException;
 
@@ -35,9 +34,6 @@ public class JohnSungController {
 
 	@Autowired
 	private JohnSungService service;
-
-	@Autowired
-	private HttpServletRequest requestHeader;
 
 	@GetMapping("/test")
 	public String getTest() {

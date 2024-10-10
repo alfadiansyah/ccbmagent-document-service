@@ -51,7 +51,7 @@ public class JohnSungService {
         return response.success(result, "00", "Sukses Mendapatkan List Document");
     }
 
-    public ResponseEntity<InputStreamResource> downloadDocument(DownloadDocumentRequest request) {
+    public ResponseEntity<InputStreamResource> downloadDocument(DownloadDocumentRequest request) throws Exception {
 
         //MEMASTIKAN STATUS DOKUMEN BELUM TERDELETE
         CheckIsDocumentDeletedResponse documentDeletedResponse = mapper.checkIsDocumentDeleted(request.getDocumentId());
