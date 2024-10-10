@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class FileComponent {
 
-    public ResponseEntity<InputStreamResource> downloadFrom(String pathLocationFile) {
+    public ResponseEntity<InputStreamResource> downloadFrom(String pathLocationFile) throws Exception {
         Path path = Paths.get(pathLocationFile);
         File file = path.toFile();
         try {
@@ -33,8 +33,8 @@ public class FileComponent {
                     .body(resource);
 
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            System.out.println("IO EXCEPTION: " + e.getMessage());
+            throw new Exception("IO EXCEPTION");
         }
-        return ResponseEntity.internalServerError().build();
     }
 }
