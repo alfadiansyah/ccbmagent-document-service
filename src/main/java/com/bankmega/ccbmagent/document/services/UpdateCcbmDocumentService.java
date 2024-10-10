@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,7 +29,7 @@ public class UpdateCcbmDocumentService {
         String fileName = request.getFile().getOriginalFilename();
         long fileSize = request.getFile().getSize();
         String fileType = request.getFile().getContentType();
-        String path = "storage/" + getPathFromDate(); // Define path based on the date or some other logic
+        String path = "storage/" + getPathFromDate(); // Define path based on the date
 
         // Save the file to the defined path
         saveFile(request.getFile(), path);
@@ -52,6 +54,7 @@ public class UpdateCcbmDocumentService {
         // Delete old records in vtiger_seattachmentsrel
         mapper.deleteFromSeAttachmentsRel(request.getDocumentId());
         mapper.updateSequenceId();
+        
         // Insert new record in vtiger_seattachmentsrel
         mapper.insertIntoSeAttachmentsRel(request.getDocumentId(), getLastInsertId());
 
@@ -68,7 +71,7 @@ public class UpdateCcbmDocumentService {
         String originalFilename = file.getOriginalFilename();
         String newFilename = generateUniqueFilename(path, originalFilename);
 
-        Files.copy(file.getInputStream(), Paths.get(path, newFilename));
+        Files.copy(file.getInputStream(), Paths.get(path, newFilename), StandardCopyOption.REPLACE_EXISTING);
     }
 
     private String generateUniqueFilename(String path, String originalFilename) {
@@ -99,9 +102,11 @@ public class UpdateCcbmDocumentService {
     }
 
     private String getPathFromDate() {
-        // Example path based on current date
-        // Implement logic to return path based on the current date or other criteria
-        return java.time.LocalDate.now().toString();
+        String year = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy"));
+        String month = LocalDate.now().format(DateTimeFormatter.ofPattern("MMMM"));
+        String week = "week" + LocalDate.now().format(DateTimeFormatter.ofPattern("W"));
+
+        return year + "/" + month + "/" + week;
     }
 
     private long getLastInsertId() {
