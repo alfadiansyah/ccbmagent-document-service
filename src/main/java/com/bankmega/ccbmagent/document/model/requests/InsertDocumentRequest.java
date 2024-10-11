@@ -21,5 +21,7 @@ public class InsertDocumentRequest {
 	private MultipartFile file;
 	private Boolean fileStatus;
 	private String folderId;
+	private String fileVersion;
+	private String fileLocationType;
 
 }
