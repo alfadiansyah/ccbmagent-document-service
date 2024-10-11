@@ -5,7 +5,7 @@ import java.net.SocketException;
 
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.bankmega.ccbmagent.document.services.IpBasedAccessService;
+import com.bankmega.ccbmagent.document.services.GioService;
 import com.bankmega.ccbmagent.document.util.IpBasedAccessUtil;
 
 import jakarta.servlet.FilterChain;
@@ -15,17 +15,17 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class IpBasedAccessFilter extends OncePerRequestFilter {
 
-    private final IpBasedAccessService ipService;
+    private final GioService gioService;
 
-    public IpBasedAccessFilter(IpBasedAccessService ipService) {
-        this.ipService = ipService;
+    public IpBasedAccessFilter(GioService gioService) {
+        this.gioService = gioService;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         String remoteIp = getClientIp(request);
-        System.out.println("Original IP: " + remoteIp); 
+        System.out.println("Original IP: " + remoteIp);
 
         if ("0:0:0:0:0:0:0:1".equals(remoteIp) || "127.0.0.1".equals(remoteIp)) {
             try {
@@ -36,9 +36,10 @@ public class IpBasedAccessFilter extends OncePerRequestFilter {
             }
         }
 
-        System.out.println("Effective IP: " + remoteIp); 
+        System.out.println("Effective IP: " + remoteIp);
 
-        if (ipService.isIpWhitelisted(remoteIp)) {
+        // Check if the IP is whitelisted using GioService
+        if (gioService.isIpWhitelisted(remoteIp)) {
             filterChain.doFilter(request, response);
         } else {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "IP Address not whitelisted");
@@ -59,4 +60,3 @@ public class IpBasedAccessFilter extends OncePerRequestFilter {
         return ipAddress;
     }
 }
-
