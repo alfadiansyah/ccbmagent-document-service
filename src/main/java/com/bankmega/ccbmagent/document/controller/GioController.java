@@ -7,96 +7,45 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.bankmega.ccbmagent.document.model.requests.GetDocumentRequest;
-import com.bankmega.ccbmagent.document.model.requests.InsertDocumentRequest;
 import com.bankmega.ccbmagent.document.model.requests.UpdateDocumentRequest;
-import com.bankmega.ccbmagent.document.services.CcbmDocumentService;
-import com.bankmega.ccbmagent.document.services.UpdateCcbmDocumentService;
+import com.bankmega.ccbmagent.document.model.responses.GetAssigntoAttachmentResponse;
+import com.bankmega.ccbmagent.document.services.GioService;
 
-import jakarta.servlet.http.HttpServletRequest;
-import mampang.validation.annotation.JsRequestBodyValidation.JsRequestBodyValidation;
 import mampang.validation.dto.MampangApiResponse;
 
 @RestController
 @RequestMapping("/ccbm/document")
-public class CcbmDocumentController {
+public class GioController {
+
+    private static final Logger logger = LoggerFactory.getLogger(GioController.class);
+    private static final long MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB in bytes
+
+    private final GioService gioService;
 
     @Autowired
-    private CcbmDocumentService service;
-
-    @Autowired
-    private UpdateCcbmDocumentService updateCcbmDocumentService;
-    private static final Logger logger = LoggerFactory.getLogger(CcbmDocumentController.class);
-
-    @Autowired
-    private HttpServletRequest requestHeader;
-    // private static final Logger logger =
-    // LoggerFactory.getLogger(YourController.class);
-
-    @PostMapping(value = "/ccbm/document/insert")
-    public ResponseEntity<?> insertDocument(@ModelAttribute InsertDocumentRequest request) {
-        return ResponseEntity.status(HttpStatus.OK).body(service.insertingDocument(request));
+    public GioController(GioService gioService) {
+        this.gioService = gioService;
     }
 
-    // gio
-    // @PostMapping("/update")
-    // public ResponseEntity<String> updateDocument(@RequestBody
-    // UpdateDocumentRequest request) {
-    // try {
-    // updateCcbmDocumentService.updateAttachment(request);
-    // return ResponseEntity.ok("Document updated successfully");
-    // } catch (Exception e) {
-    // return ResponseEntity.status(500).body("Failed to update document: " +
-    // e.getMessage());
-    // }
-    // }
-
-    @GetMapping("/test")
-    public String getTest() {
-        return "Test Success";
+    // Endpoint for getting assignment data
+    @GetMapping("/attachment/data")
+    public ResponseEntity<GetAssigntoAttachmentResponse> getAssignmentData(
+            @RequestParam("channel") String channel) {
+        try {
+            GetAssigntoAttachmentResponse response = gioService.getCombinedUserAndDivisionData(channel);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
     }
 
-    @GetMapping("/test-exception")
-    public String getTestEx() throws Exception {
-        throw new Exception("halo saya exception");
-    }
-
-    @PostMapping("/get")
-    @JsRequestBodyValidation
-    public HttpEntity<MampangApiResponse> getDocuments(@RequestBody GetDocumentRequest request) {
-        // ini di komen dulu karena belum tahu fungsi usernamenya buat apa
-        // if (requestHeader.getHeader("username") == null) {
-        // throw new JsException("404", "Ditemukan Header Kosong => username",
-        // HttpStatus.OK);
-        // }
-        return service.getDocument(request.getTicketId());
-    }
-
-    // Gio get data from attatchment folder
-    @GetMapping("/folders-attachments")
-    public HttpEntity<MampangApiResponse> getFolders() {
-        // Call the service method and return its result
-        return service.getFolders();
-    }
-
-    @GetMapping("/test-ip")
-    public HttpEntity<MampangApiResponse> getIps() {
-        MampangApiResponse response = new MampangApiResponse("data", "00", "Success");
-
-        response.setRc("00");
-        response.setRd("Success");
-        response.setData("data");
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
+    // Endpoint for updating document
     @PostMapping("/update")
     public HttpEntity<MampangApiResponse> updateDocument(
             @RequestParam("documentId") long documentId,
@@ -121,14 +70,12 @@ public class CcbmDocumentController {
         logger.info("folderId: {}", folderId);
         logger.info("fileVersion: {}", fileVersion);
         logger.info("fileLocationType: {}", fileLocationType);
+        
         MampangApiResponse response = new MampangApiResponse("data", "00", "Success");
 
         try {
             // Validate file size
-            if (file.getSize() > 3 * 1024 * 1024) { // 3MB in bytes
-                // return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
-                // .body("File size exceeds the maximum allowed size of 3MB.");
-                // response.setData("File size exceeds the maximum allowed size of 3MB.");
+            if (file.getSize() > MAX_FILE_SIZE) { 
                 response.setRc("400");
                 response.setRd("Gagal update attachment");
                 response.setData("File size exceeds the maximum allowed size of 3MB.");
@@ -149,23 +96,28 @@ public class CcbmDocumentController {
             request.setFileLocationType(fileLocationType);
 
             // Call the service method
-            updateCcbmDocumentService.updateAttachment(request);
-            // return ResponseEntity.ok("Document updated successfully");
+            gioService.updateAttachment(request);
+
             response.setData("Updated attachment success!");
             response.setRc("00");
             response.setRd("Document updated successfully");
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            // Log the exception and return error response
             e.printStackTrace();
-            // return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            // .body("Failed to update document: " + e.getMessage());
             response.setData(e.getMessage());
             response.setRc("400");
-            response.setRd("Gagal update attachment ");
+            response.setRd("Gagal update attachment");
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-
         }
     }
 
+    // Sample test IP endpoint (from the original controller)
+    @GetMapping("/test-ip")
+    public HttpEntity<MampangApiResponse> getIps() {
+        MampangApiResponse response = new MampangApiResponse("data", "00", "Success");
+        response.setRc("00");
+        response.setRd("Success");
+        response.setData("data");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }
