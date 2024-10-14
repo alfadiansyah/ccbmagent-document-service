@@ -33,13 +33,6 @@ public class GioController {
         this.gioService = gioService;
     }
 
-    // GET FOLDER
-    @GetMapping("/folders-attachments")
-    public HttpEntity<MampangApiResponse> getFolders() {
-        // Call the service method and return its result
-        return gioService.getFolders();
-    }
-
     // Endpoint for getting assignment data
     @GetMapping("/attachment/data")
     public ResponseEntity<GetAssigntoAttachmentResponse> getAssignmentData(

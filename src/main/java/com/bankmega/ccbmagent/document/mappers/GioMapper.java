@@ -6,18 +6,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import com.bankmega.ccbmagent.document.model.requests.GetAssigntoAttachmentBankMegaRequest;
 import com.bankmega.ccbmagent.document.model.requests.GetAssigntoAttachmentDivision;
 import com.bankmega.ccbmagent.document.model.requests.GetAssigntoAttachmentSyariahBankMegaRequest;
-import com.bankmega.ccbmagent.document.model.responses.GetDocumentResponse;
-import com.bankmega.ccbmagent.document.model.responses.GetFolderResponse;
 
 @Mapper
 @Qualifier("sqlSessionTemplateMaster")
 public interface GioMapper {
 
-
-    List<GetDocumentResponse> getListDocument(@Param("paramTicketId") String paramTicketId);
-
-    @Select("SELECT folderid, foldername FROM vtiger_attachmentsfolder ORDER BY foldername ASC")
-    List<GetFolderResponse> getFolders();
     // ===================== Division Queries =====================
     
     @Select("SELECT md.divisiid, md.nama " +
