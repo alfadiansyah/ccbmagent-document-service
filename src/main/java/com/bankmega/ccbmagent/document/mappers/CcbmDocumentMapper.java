@@ -143,6 +143,4 @@ public interface CcbmDocumentMapper {
     
     List<GetDocumentResponse> getListDocument(@Param("paramTicketId") String paramTicketId);
 
-    @Select("SELECT folderid, foldername FROM vtiger_attachmentsfolder ORDER BY foldername ASC")
-    List<GetFolderResponse> getFolders();
 }
