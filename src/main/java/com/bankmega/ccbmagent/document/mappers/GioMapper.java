@@ -101,9 +101,10 @@ public interface GioMapper {
             @Param("documentId") long documentId);
 
     // UPDATE Sequence ID
+    
     @Update("UPDATE vtiger_crmentity_seq SET id = LAST_INSERT_ID(id + 1)")
     void updateSequenceId();
-
+    
     @Select("SELECT LAST_INSERT_ID()")
     long getLastInsertId();
 

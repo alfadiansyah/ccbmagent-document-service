@@ -87,22 +87,36 @@ public class GioService {
 
     // Method to update document attachment
     public void updateAttachment(UpdateDocumentRequest request) throws IOException {
-
+        // Cek apakah file kosong
+        if (request.getFile() == null || request.getFile().isEmpty()) {
+            // Jika file kosong, hanya update vtiger_crmentity saja
+            // logger.info("File is empty, proceeding with partial update.");
+    
+            gioMapper.updateVtigerCrmEntity(
+                    request.getAssignTo(),
+                    request.getUserId(),
+                    request.getDocumentId());
+    
+            // Stop execution here, no need to update file-related fields
+            return;
+        }
+    
+        // Lanjutkan dengan update normal jika file ada
         // Define file metadata
         String fileName = request.getFile().getOriginalFilename();
         long fileSize = request.getFile().getSize();
         String fileType = request.getFile().getContentType();
         String path = "storage/" + getPathFromDate(); // Define path based on the date
-
+    
         // Save the file to the defined path
         saveFile(request.getFile(), path);
-
+    
         // Update vtiger_crmentity
         gioMapper.updateVtigerCrmEntity(
                 request.getAssignTo(),
                 request.getUserId(),
                 request.getDocumentId());
-
+    
         // Update vtiger_notes
         gioMapper.updateVtigerNotes(
                 request.getFileLocationType(),
@@ -113,14 +127,13 @@ public class GioService {
                 request.getDescriptionAttachment(),
                 request.getTitle(),
                 request.getDocumentId());
-
+    
         // Delete old records in vtiger_seattachmentsrel
         gioMapper.deleteFromSeAttachmentsRel(request.getDocumentId());
-        gioMapper.updateSequenceId();
-        
+    
         // Insert new record in vtiger_seattachmentsrel
         gioMapper.insertIntoSeAttachmentsRel(request.getDocumentId(), getLastInsertId());
-
+    
         // Optionally, handle owner notify updates if needed
         gioMapper.deleteOwnerNotifyByCrmId(request.getDocumentId());
         gioMapper.insertOwnerNotify(request.getDocumentId(), request.getAssignTo());
@@ -131,6 +144,7 @@ public class GioService {
         if (!directory.exists()) {
             directory.mkdirs();
         }
+
         String originalFilename = file.getOriginalFilename();
         String newFilename = generateUniqueFilename(path, originalFilename);
 
@@ -148,9 +162,12 @@ public class GioService {
 
         // Replace spaces with underscores in the filename
         filename = filename.replace(" ", "_");
-
+        // gioMapper.updateSequenceId();
         // Add LastSequenceID to the filename
+        gioMapper.updateSequenceId();
         long lastSequenceId = getLastInsertId();
+        System.out.println("Last Insert ID: " + lastSequenceId);
+
         String newFilename = lastSequenceId + "_" + filename + extension;
 
         File file = new File(path, newFilename);
