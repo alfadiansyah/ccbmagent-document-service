@@ -10,9 +10,9 @@ import org.springframework.stereotype.Service;
 
 import com.bankmega.ccbmagent.document.components.FileComponent;
 import com.bankmega.ccbmagent.document.components.ResponseGenerator;
-import com.bankmega.ccbmagent.document.mappers.JohnSungMapper;
 import com.bankmega.ccbmagent.document.components.StringComponent;
 import com.bankmega.ccbmagent.document.components.TimeComponent;
+import com.bankmega.ccbmagent.document.mappers.JohnSungMapper;
 import com.bankmega.ccbmagent.document.model.requests.DeleteDocumentRequest;
 import com.bankmega.ccbmagent.document.model.requests.DownloadDocumentRequest;
 import com.bankmega.ccbmagent.document.model.responses.ApiResponse;
@@ -77,10 +77,6 @@ public class JohnSungService {
         GetDocumentDownloadCountResponse downloadCount = mapper.getDocumentDownloadCount(request.getDocumentId());
 
         System.out.println("DOWNLOAD COUNT: " + downloadCount);
-
-        if (downloadCount == null || downloadCount.getFileDownloadCount() == null) {
-            throw new JsException("404", "File Tidak Terdaftar di tabel download, Tidak ada dokumen dengan ID: " + request.getDocumentId(), HttpStatus.OK);
-        }
 
         //UPDATE DOWNLOAD COUNT
         Integer updatedFileDownloadCount = downloadCount.getFileDownloadCount() + 1;

@@ -35,6 +35,9 @@ public class ThariqService {
     	String title = "";
     	String description = "";
     	String folderId = "";
+    	String pathFolder = "";
+    	String fileVersion = "";
+    	String fileLocationType = "";
     	Integer ticketId = 0;
     	Integer userId = 0;
     	Integer assignTo = 0;
@@ -83,6 +86,14 @@ public class ThariqService {
     				result = new ApiResponse("400", "Field FolderId Kosong", false);
     				break;
     			}
+//    			if (request.getFileVersion() == null || request.getFileVersion().isBlank()) {
+//    				result = new ApiResponse("400", "Field File Version Kosong", false);
+//    				break;
+//    			}
+//    			if (request.getFileLocationType() == null || request.getFileLocationType().isBlank()) {
+//    				result = new ApiResponse("400", "Field File Location Type Kosong", false);
+//    				break;
+//    			}
     			
     			ticketId = Integer.parseInt(request.getTicketId());
         		assignTo = Integer.parseInt(request.getAssignTo());
@@ -128,14 +139,16 @@ public class ThariqService {
         		// step 6: insert and update document into tb notes and senotesrel
         		// 6.1 insert document to notes
         		log.info("insert document to notes");
-        		mapper.insertDocumentToNotes(lastId, title, description, status, folderId, "DOC" + pastCurId);
+        		fileVersion = request.getFileVersion();
+        		fileLocationType = request.getFileLocationType();
+        		mapper.insertDocumentToNotes(lastId, title, description, status, folderId, "DOC" + pastCurId, fileVersion);
         		
         		// 6.2 insert document notes to notesrel
         		mapper.insertDocumentNotes(ticketId, lastId);
         		log.info("insert document notes");
         		
         		// 6.3 update document details <6.1>
-        		mapper.updateDocumentDetailsInNotes(fileName, (int) fileSize, fileType, lastId);
+        		mapper.updateDocumentDetailsInNotes(fileName, (int) fileSize, fileType, lastId, fileVersion, fileLocationType);
         		log.info("update document details in notes");
         		
         		// step 7: updating and select the last sequence id
@@ -153,7 +166,8 @@ public class ThariqService {
         		log.info("insert document attachment to crmentity");
         		
         		// 8.2 insert document attachment to attachments
-        		mapper.insertDocumentAttachmentToAttachments(lastIdSec, fileName, fileType, path);
+        		pathFolder = path + dateFormatting();
+        		mapper.insertDocumentAttachmentToAttachments(lastIdSec, fileName, fileType, pathFolder);
         		log.info("insert document attachment to attachments");
         		
         		// step 9: insert to seattachmentrel
@@ -171,7 +185,7 @@ public class ThariqService {
         		
         		// bikin directory untuk menampung file yg diupload
         	
-        		File directory = new File(path + dateFormatting() + lastIdSec + "_" + fileName);
+        		File directory = new File(pathFolder + lastIdSec + "_" + fileName);
         		log.info("directory: " + directory.exists());
         		if (!directory.exists()) {
         			log.info("membuat directory");

@@ -97,7 +97,7 @@ public interface ThariqMapper {
 
 		// step 6: insert and update document to notes and senotesrel
 		// 6.1
-		public String insertDocumentToNotes(Integer lastId, String title, String description, Boolean status, String folderId, String documentSequence) {
+		public String insertDocumentToNotes(Integer lastId, String title, String description, Boolean status, String folderId, String documentSequence, String fileVersion) {
 			return "insert into"
 						+ " vtiger_notes ("
 							+ " notesid,"
@@ -108,7 +108,9 @@ public interface ThariqMapper {
 							+ " fileversion,"
 							+ " filestatus,"
 							+ " folderid,"
-							+ " note_no "
+							+ " note_no,"
+							+ " fileversion,"
+							+ " filelocationtype "
 						+ ") values ("
 							+ " " + lastId + ","
 							+ " '" + title + "',"
@@ -118,7 +120,8 @@ public interface ThariqMapper {
 							+ " '',"
 							+ " " + status + ","
 							+ " '" + folderId + "',"
-							+ " '" + documentSequence + "' "
+							+ " '" + documentSequence + "',"
+							+ " '" + fileVersion +"' "
 						+ ");";
 		}
 
@@ -135,15 +138,17 @@ public interface ThariqMapper {
 		}
 
 		// 6.3
-		public String updateDocumentDetailsInNotes(String fileName, Integer fileSize, String fileType, Integer lastId) {
+		public String updateDocumentDetailsInNotes(String fileName, Integer fileSize, String fileType, Integer lastId, String fileVersion, String fileLocationType) {
 			return "update"
 						+ " vtiger_notes "
 					+ "set"
 						+ " filename = '" + fileName + "',"
 						+ " filesize = " + fileSize + ","
 						+ " filetype = '" + fileType + "',"
-						+ " filelocationtype = 'I', "
-						+ " filedownloadcount = NULL "
+						+ " filelocationtype = 'I',"
+						+ " filedownloadcount = NULL,"
+						+ " fileversion = '" + fileVersion + "',"
+						+ " filelocationtype = '" + fileLocationType + "' "
 					+ "where"
 						+ " notesid = " + lastId + ";";
 		}
@@ -249,13 +254,13 @@ public interface ThariqMapper {
 
 	// step 6: insert and update document to notes and senotesrel
 	@InsertProvider(type = Query.class, method = "insertDocumentToNotes")
-	public void insertDocumentToNotes(Integer lastId, String title, String description, Boolean status, String folderId, String documentSequence);
+	public void insertDocumentToNotes(Integer lastId, String title, String description, Boolean status, String folderId, String documentSequence, String fileVersion);
 
 	@InsertProvider(type = Query.class, method = "insertDocumentNotes")
 	public void insertDocumentNotes(Integer ticketId, Integer lastId);
 
 	@UpdateProvider(type = Query.class, method = "updateDocumentDetailsInNotes")
-	public void updateDocumentDetailsInNotes(String fileName, Integer fileSize, String fileType, Integer lastId);
+	public void updateDocumentDetailsInNotes(String fileName, Integer fileSize, String fileType, Integer lastId, String fileVersion, String fileLocationType);
 
 	// step 8: insert document attachment to 
 	@InsertProvider(type = Query.class, method = "insertDocumentAttachmentToCrmentity")

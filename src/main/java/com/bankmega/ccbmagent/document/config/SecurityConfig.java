@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.bankmega.ccbmagent.document.services.GioService;
 
@@ -22,16 +21,17 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .authorizeHttpRequests(authorize -> authorize
+          .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/ccbm/document/**").permitAll() // Allow unrestricted access for specific endpoints
-                .requestMatchers("/user/point-service/**").permitAll() // Pastikan endpoint ini diizinkan tanpa autentikasi
+                //ini di allow dulu yaa selama dev
+                .requestMatchers("/**").permitAll() // Allow unrestricted access for specific endpoints
                 .anyRequest().authenticated() // Require authentication for all other requests
-            )
-            .csrf(csrf -> csrf.disable()) // Disable CSRF for simplicity; enable in production
-            .formLogin(form -> form.disable()) // Disable default form login setup
-            .httpBasic(httpBasic -> httpBasic.disable());
-            // .addFilterBefore(new IpBasedAccessFilter(gioService), UsernamePasswordAuthenticationFilter.class);
-
+          )
+          .csrf(csrf -> csrf.disable()) // Disable CSRF for simplicity; enable in production
+          .formLogin(form -> form.disable()) // Default form login setup
+          .httpBasic(httpBasic -> httpBasic.disable());
+          // .addFilterBefore(new IpBasedAccessFilter(ipService), UsernamePasswordAuthenticationFilter.class);
+      
         return http.build();
     }
 }
