@@ -3,17 +3,19 @@ package com.bankmega.ccbmagent.document.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
-import com.bankmega.ccbmagent.document.services.IpBasedAccessService;
+import com.bankmega.ccbmagent.document.services.GioService;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
-    private final IpBasedAccessService ipService;
+    private final GioService gioService;
 
-    public SecurityConfig(IpBasedAccessService ipService) {
-        this.ipService = ipService;
+    public SecurityConfig(GioService gioService) {
+        this.gioService = gioService;
     }
 
     @Bean
