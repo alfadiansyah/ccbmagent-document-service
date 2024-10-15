@@ -6,14 +6,14 @@ import org.springframework.web.bind.annotation.*;
 
 import com.bankmega.ccbmagent.document.model.requests.PointAuthRequest;
 import com.bankmega.ccbmagent.document.model.responses.PointAuthResponse;
-import com.bankmega.ccbmagent.document.services.PointService;
+import com.bankmega.ccbmagent.document.services.GioPointService;
 
 @RestController
 @RequestMapping("/user/point-service")
-public class PointController {
+public class GioPointController {
 
     @Autowired
-    private PointService pointService;
+    private GioPointService pointService;
 
     @PostMapping
     public ResponseEntity<PointAuthResponse> processPointService(@RequestBody PointAuthRequest request) throws Exception {

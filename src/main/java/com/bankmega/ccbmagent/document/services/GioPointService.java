@@ -8,7 +8,7 @@ import com.bankmega.ccbmagent.document.model.responses.PointAuthResponse;
 import com.bankmega.ccbmagent.document.util.AesEncryptionUtil;
 
 @Service
-public class PointService {
+public class GioPointService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final AesEncryptionUtil aesUtil = new AesEncryptionUtil();
 
