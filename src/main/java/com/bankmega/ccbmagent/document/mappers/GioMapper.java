@@ -104,9 +104,9 @@ public interface GioMapper {
     
     @Update("UPDATE vtiger_crmentity_seq SET id = LAST_INSERT_ID(id + 1)")
     void updateSequenceId();
-    
     @Select("SELECT LAST_INSERT_ID()")
     long getLastInsertId();
+
 
     // INSERT into vtiger_crmentity
     @Insert("INSERT INTO vtiger_crmentity " +

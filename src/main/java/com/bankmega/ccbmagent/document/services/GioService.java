@@ -24,12 +24,8 @@ import com.bankmega.ccbmagent.document.model.responses.GetAssigntoAttachmentResp
 @Service
 public class GioService {
 
-    // Unified mapper for all functionalities
     private final GioMapper gioMapper;
-
-    // Variables for IP whitelisting
     private final Set<String> whitelistedIps = new HashSet<>();
-
     private static final long MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB in bytes
 
     @Autowired
@@ -38,7 +34,6 @@ public class GioService {
         reloadWhitelistedIps("api_attachment"); // Load initial IPs
     }
 
-    // Method to get combined user and division data
     public GetAssigntoAttachmentResponse getCombinedUserAndDivisionData(String channel) {
         List<GetAssigntoAttachmentBankMegaRequest> bankMegaUsers = new ArrayList<>();
         List<GetAssigntoAttachmentSyariahBankMegaRequest> syariahBankMegaUsers = new ArrayList<>();
@@ -68,7 +63,6 @@ public class GioService {
                 .build();
     }
 
-    // Method for reloading whitelisted IPs
     public void reloadWhitelistedIps(String accessFunction) {
         try {
             List<String> ipList = gioMapper.getWhitelistedIpsByFunction(accessFunction);
@@ -85,56 +79,62 @@ public class GioService {
         return whitelistedIps.contains(ip);
     }
 
-    // Method to update document attachment
     public void updateAttachment(UpdateDocumentRequest request) throws IOException {
         // Cek apakah file kosong
         if (request.getFile() == null || request.getFile().isEmpty()) {
-            // Jika file kosong, hanya update vtiger_crmentity saja
-            // logger.info("File is empty, proceeding with partial update.");
-    
+            // File kosong, tetap update semua field kecuali file-related
             gioMapper.updateVtigerCrmEntity(
                     request.getAssignTo(),
                     request.getUserId(),
                     request.getDocumentId());
-    
-            // Stop execution here, no need to update file-related fields
+
+            gioMapper.updateVtigerNotes(
+                    request.getFileLocationType(),
+                    null, // Tidak ada file yang diupdate
+                    request.getFileStatus() ? 1 : 0,
+                    request.getFileVersion(),
+                    Integer.parseInt(request.getFolderId()),
+                    request.getDescriptionAttachment(),
+                    request.getTitle(),
+                    request.getDocumentId());
+
+            // Hapus dan update owner notify
+            gioMapper.deleteOwnerNotifyByCrmId(request.getDocumentId());
+            gioMapper.insertOwnerNotify(request.getDocumentId(), request.getAssignTo());
+
             return;
         }
-    
-        // Lanjutkan dengan update normal jika file ada
-        // Define file metadata
+
+        // Jika file ada, proses penyimpanan dan update data terkait file
         String fileName = request.getFile().getOriginalFilename();
         long fileSize = request.getFile().getSize();
         String fileType = request.getFile().getContentType();
         String path = "storage/" + getPathFromDate(); // Define path based on the date
-    
-        // Save the file to the defined path
+
         saveFile(request.getFile(), path);
-    
+
         // Update vtiger_crmentity
         gioMapper.updateVtigerCrmEntity(
                 request.getAssignTo(),
                 request.getUserId(),
                 request.getDocumentId());
-    
+
         // Update vtiger_notes
         gioMapper.updateVtigerNotes(
                 request.getFileLocationType(),
                 fileName,
-                request.getFileStatus() ? 1 : 0, // Assuming fileStatus is Boolean, convert to int
+                request.getFileStatus() ? 1 : 0,
                 request.getFileVersion(),
-                Integer.parseInt(request.getFolderId()), // Assuming folderId is String but should be Integer
+                Integer.parseInt(request.getFolderId()),
                 request.getDescriptionAttachment(),
                 request.getTitle(),
                 request.getDocumentId());
-    
-        // Delete old records in vtiger_seattachmentsrel
+
+        // Delete and reinsert attachment relation
         gioMapper.deleteFromSeAttachmentsRel(request.getDocumentId());
-    
-        // Insert new record in vtiger_seattachmentsrel
         gioMapper.insertIntoSeAttachmentsRel(request.getDocumentId(), getLastInsertId());
-    
-        // Optionally, handle owner notify updates if needed
+
+        // Update owner notify
         gioMapper.deleteOwnerNotifyByCrmId(request.getDocumentId());
         gioMapper.insertOwnerNotify(request.getDocumentId(), request.getAssignTo());
     }
@@ -160,13 +160,9 @@ public class GioService {
             extension = originalFilename.substring(dotIndex);
         }
 
-        // Replace spaces with underscores in the filename
         filename = filename.replace(" ", "_");
-        // gioMapper.updateSequenceId();
-        // Add LastSequenceID to the filename
         gioMapper.updateSequenceId();
         long lastSequenceId = getLastInsertId();
-        System.out.println("Last Insert ID: " + lastSequenceId);
 
         String newFilename = lastSequenceId + "_" + filename + extension;
 
