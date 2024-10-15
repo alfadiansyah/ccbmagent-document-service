@@ -24,6 +24,7 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/ccbm/document/**").permitAll() // Allow unrestricted access for specific endpoints
+                .requestMatchers("/user/point-service/**").permitAll() // Pastikan endpoint ini diizinkan tanpa autentikasi
                 .anyRequest().authenticated() // Require authentication for all other requests
             )
             .csrf(csrf -> csrf.disable()) // Disable CSRF for simplicity; enable in production
