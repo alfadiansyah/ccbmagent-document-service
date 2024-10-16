@@ -108,7 +108,7 @@ public class JohnSungService {
         /**
          * UPDATE STATUS DOKUMEN
          * 
-         * SEBELUM ITU TIMESTAMP DI 
+         * SEBELUM ITU TIMESTAMP WAJIB DISET KE 24 HOUR FORMAT
          */
         mapper.updateDocumentStatus(time.getTimeStamp24HourFormat(), request.getUserId(), request.getTicketId());
 
