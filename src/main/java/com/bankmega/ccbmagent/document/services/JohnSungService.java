@@ -25,22 +25,22 @@ import mampang.validation.exception.JsException;
 
 @Service
 public class JohnSungService {
-	
-	@Autowired
-	private JohnSungMapper mapper;
-	
-	@Autowired
-	private ResponseGenerator response;
-	
-	@Autowired
-	private FileComponent file;
-	
-	@Autowired
-	private TimeComponent time;
-	
-	@Autowired
-	private StringComponent stringComponent;
-	
+
+    @Autowired
+    private JohnSungMapper mapper;
+
+    @Autowired
+    private ResponseGenerator response;
+
+    @Autowired
+    private FileComponent file;
+
+    @Autowired
+    private TimeComponent time;
+
+    @Autowired
+    private StringComponent stringComponent;
+
     public ResponseEntity<ApiResponse> getDocument(String ticketId) {
         List<GetDocumentResponse> result = mapper.getListDocument(ticketId);
 
@@ -76,6 +76,10 @@ public class JohnSungService {
         //MENDAPATKAN DOWNLOAD COUNT UNTUK DI UPDATE
         GetDocumentDownloadCountResponse downloadCount = mapper.getDocumentDownloadCount(request.getDocumentId());
 
+        if (downloadCount.getFileDownloadCount() == null) {
+            downloadCount.setFileDownloadCount(0);
+        }
+
         System.out.println("DOWNLOAD COUNT: " + downloadCount);
 
         //UPDATE DOWNLOAD COUNT
@@ -107,7 +111,7 @@ public class JohnSungService {
         //UPDATE STATUS DOKUMEN
         /**
          * UPDATE STATUS DOKUMEN
-         * 
+         *
          * SEBELUM ITU TIMESTAMP WAJIB DISET KE 24 HOUR FORMAT
          */
         mapper.updateDocumentStatus(time.getTimeStamp24HourFormat(), request.getUserId(), request.getTicketId());
