@@ -18,12 +18,34 @@ public class TimeComponent {
      *
      * @author John Sung (23020224)
      */
-    public String getTimeStamp() {
+    public String getTimeStamp12HourFormat() {
         // Get the current date and time
         LocalDateTime now = LocalDateTime.now();
 
         // Define the format
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss a");
+
+        // Format the current date and time
+        String formattedNow = now.format(formatter);
+
+        // Print the formatted date and time
+        System.out.println("Current Timestamp:" + formattedNow);
+        return formattedNow;
+    }
+
+    /**
+     * Method for get timestamp with default pattern of yyyy-MM-dd hh:mm:ss a
+     *
+     * @return String timestamp
+     *
+     * @author John Sung (23020224)
+     */
+    public String getTimeStamp24HourFormat() {
+        // Get the current date and time
+        LocalDateTime now = LocalDateTime.now();
+
+        // Define the format
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss a");
 
         // Format the current date and time
         String formattedNow = now.format(formatter);
@@ -41,7 +63,7 @@ public class TimeComponent {
      *
      * @author John Sung (23020224)
      */
-    public String getTimeStamp(String pattern) {
+    public String getTimeStampCustomPattern(String pattern) {
         // Get the current date and time
         LocalDateTime now = LocalDateTime.now();
 
