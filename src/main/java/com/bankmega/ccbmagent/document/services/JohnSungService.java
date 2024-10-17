@@ -17,7 +17,6 @@ import com.bankmega.ccbmagent.document.model.requests.DeleteDocumentRequest;
 import com.bankmega.ccbmagent.document.model.requests.DownloadDocumentRequest;
 import com.bankmega.ccbmagent.document.model.responses.ApiResponse;
 import com.bankmega.ccbmagent.document.model.responses.CheckIsDocumentDeletedResponse;
-import com.bankmega.ccbmagent.document.model.responses.GetDocumentDownloadCountResponse;
 import com.bankmega.ccbmagent.document.model.responses.GetDocumentLocationResponse;
 import com.bankmega.ccbmagent.document.model.responses.GetDocumentResponse;
 
@@ -52,7 +51,6 @@ public class JohnSungService {
     }
 
     public ResponseEntity<InputStreamResource> downloadDocument(DownloadDocumentRequest request) throws Exception {
-
         //MEMASTIKAN STATUS DOKUMEN BELUM TERDELETE
         CheckIsDocumentDeletedResponse documentDeletedResponse = mapper.checkIsDocumentDeleted(request.getDocumentId());
 
@@ -74,16 +72,16 @@ public class JohnSungService {
         System.out.println("SUKSES MENDAPATKAN LOKASI, MENCOBA DOWNLOAD DOKUMEN");
 
         //MENDAPATKAN DOWNLOAD COUNT UNTUK DI UPDATE
-        GetDocumentDownloadCountResponse downloadCount = mapper.getDocumentDownloadCount(request.getDocumentId());
+        Integer downloadCount = mapper.getDocumentDownloadCount(request.getDocumentId());
 
-        if (downloadCount.getFileDownloadCount() == null) {
-            downloadCount.setFileDownloadCount(0);
+        if (downloadCount == null) {
+            downloadCount = 0;
         }
 
         System.out.println("DOWNLOAD COUNT: " + downloadCount);
 
         //UPDATE DOWNLOAD COUNT
-        Integer updatedFileDownloadCount = downloadCount.getFileDownloadCount() + 1;
+        Integer updatedFileDownloadCount = downloadCount + 1;
         mapper.updateDocumentDownloadStatus(request.getDocumentId(), updatedFileDownloadCount);
 
         System.out.println("SUKSES UPDATE DOWNLOAD STATUS");
