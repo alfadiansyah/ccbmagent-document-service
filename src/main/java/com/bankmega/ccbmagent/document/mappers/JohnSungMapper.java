@@ -10,7 +10,6 @@ import org.apache.ibatis.annotations.Update;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.bankmega.ccbmagent.document.model.responses.CheckIsDocumentDeletedResponse;
-import com.bankmega.ccbmagent.document.model.responses.GetDocumentDownloadCountResponse;
 import com.bankmega.ccbmagent.document.model.responses.GetDocumentLocationResponse;
 import com.bankmega.ccbmagent.document.model.responses.GetDocumentResponse;
 
@@ -81,7 +80,7 @@ public interface JohnSungMapper {
 
     //nanti disini dapet integer jumlah count
     @Select("SELECT filedownloadcount AS fileDownloadCount from vtiger_notes where notesid= '${documentId}'")
-    public GetDocumentDownloadCountResponse getDocumentDownloadCount(String documentId);
+    public Integer getDocumentDownloadCount(String documentId);
 
     //jumlah count +1 update kesini
     @Update("UPDATE vtiger_notes set filedownloadcount= ${fileDownloadCount} where notesid= '${documentId}'")
