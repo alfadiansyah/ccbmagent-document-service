@@ -45,71 +45,58 @@ public class GioController {
         }
     }
 
-    // Endpoint for updating document
     @PostMapping("/update")
-    public HttpEntity<MampangApiResponse> updateDocument(
-            @RequestParam("documentId") long documentId,
-            @RequestParam("assignTo") String assignTo,
-            @RequestParam("userId") String userId,
-            @RequestParam("title") String title,
-            @RequestParam("descriptionAttachment") String descriptionAttachment,
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("fileStatus") Boolean fileStatus,
-            @RequestParam("folderId") String folderId,
-            @RequestParam("fileVersion") String fileVersion,
-            @RequestParam("fileLocationType") String fileLocationType) {
+public HttpEntity<MampangApiResponse> updateDocument(
+        @RequestParam("documentId") long documentId,
+        @RequestParam("assignTo") String assignTo,
+        @RequestParam("userId") String userId,
+        @RequestParam("title") String title,
+        @RequestParam("descriptionAttachment") String descriptionAttachment,
+        @RequestParam(required = false, value = "file") MultipartFile file,  // File menjadi opsional
+        @RequestParam("fileStatus") Boolean fileStatus,
+        @RequestParam("folderId") String folderId,
+        @RequestParam("fileVersion") String fileVersion,
+        @RequestParam("fileLocationType") String fileLocationType) {
 
-        // Log request parameters
-        logger.info("Received request to update document:");
-        logger.info("documentId: {}", documentId);
-        logger.info("assignTo: {}", assignTo);
-        logger.info("userId: {}", userId);
-        logger.info("title: {}", title);
-        logger.info("descriptionAttachment: {}", descriptionAttachment);
-        logger.info("fileStatus: {}", fileStatus);
-        logger.info("folderId: {}", folderId);
-        logger.info("fileVersion: {}", fileVersion);
-        logger.info("fileLocationType: {}", fileLocationType);
-        
-        MampangApiResponse response = new MampangApiResponse("data", "00", "Success");
+    MampangApiResponse response = new MampangApiResponse("data", "00", "Success");
 
-        try {
-            // Validate file size
-            if (file.getSize() > MAX_FILE_SIZE) { 
-                response.setRc("400");
-                response.setRd("Gagal update attachment");
-                response.setData("File size exceeds the maximum allowed size of 3MB.");
-                return new ResponseEntity<>(response, HttpStatus.PAYLOAD_TOO_LARGE);
-            }
-
-            // Create a request object
-            UpdateDocumentRequest request = new UpdateDocumentRequest();
-            request.setDocumentId(documentId);
-            request.setAssignTo(assignTo);
-            request.setUserId(userId);
-            request.setTitle(title);
-            request.setDescriptionAttachment(descriptionAttachment);
-            request.setFile(file);
-            request.setFileStatus(fileStatus);
-            request.setFolderId(folderId);
-            request.setFileVersion(fileVersion);
-            request.setFileLocationType(fileLocationType);
-
-            // Call the service method
-            gioService.updateAttachment(request);
-
-            response.setData("Updated attachment success!");
-            response.setRc("00");
-            response.setRd("Document updated successfully");
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.setData(e.getMessage());
+    try {
+        // Validate file size if file is present
+        if (file != null && file.getSize() > MAX_FILE_SIZE) {
             response.setRc("400");
             response.setRd("Gagal update attachment");
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            response.setData("File size exceeds the maximum allowed size of 3MB.");
+            return new ResponseEntity<>(response, HttpStatus.PAYLOAD_TOO_LARGE);
         }
+
+        // Create request object
+        UpdateDocumentRequest request = new UpdateDocumentRequest();
+        request.setDocumentId(documentId);
+        request.setAssignTo(assignTo);
+        request.setUserId(userId);
+        request.setTitle(title);
+        request.setDescriptionAttachment(descriptionAttachment);
+        request.setFile(file);  // Assign file, even if it's null
+        request.setFileStatus(fileStatus);
+        request.setFolderId(folderId);
+        request.setFileVersion(fileVersion);
+        request.setFileLocationType(fileLocationType);
+
+        // Call the service method
+        gioService.updateAttachment(request);
+
+        response.setData("Updated attachment success!");
+        response.setRc("00");
+        response.setRd("Document updated successfully");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    } catch (Exception e) {
+        e.printStackTrace();
+        response.setData(e.getMessage());
+        response.setRc("400");
+        response.setRd("Gagal update attachment");
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+}
 
     // Sample test IP endpoint (from the original controller)
     @GetMapping("/test-ip")
