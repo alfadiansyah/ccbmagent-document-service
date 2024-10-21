@@ -11,6 +11,9 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,6 +23,9 @@ import com.bankmega.ccbmagent.document.model.requests.GetAssigntoAttachmentDivis
 import com.bankmega.ccbmagent.document.model.requests.GetAssigntoAttachmentSyariahBankMegaRequest;
 import com.bankmega.ccbmagent.document.model.requests.UpdateDocumentRequest;
 import com.bankmega.ccbmagent.document.model.responses.GetAssigntoAttachmentResponse;
+import com.bankmega.ccbmagent.document.model.responses.GetFolderResponse;
+
+import mampang.validation.dto.MampangApiResponse;
 
 @Service
 public class GioService {
@@ -32,6 +38,31 @@ public class GioService {
     public GioService(GioMapper gioMapper) {
         this.gioMapper = gioMapper;
         reloadWhitelistedIps("api_attachment"); // Load initial IPs
+    }
+
+    public HttpEntity<MampangApiResponse> getFolders() {
+        try {
+            // Retrieve the list of folders from the mapper
+            List<GetFolderResponse> folders = gioMapper.getFolders();
+            // logger.debug("Retrieved folders: {}", folders);
+			
+            // Create a response object
+            MampangApiResponse response = new MampangApiResponse(folders, "00", "Success");
+            response.setRc("00");
+            response.setRd("Success");
+            response.setData(folders);
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            // Handle error and create an error response object
+            MampangApiResponse errorResponse = new MampangApiResponse(e.getMessage(), "01", "Error retrieving folders");
+			// logger.error("Error retrieving folders", e);
+			errorResponse.setRc("01");
+            errorResponse.setRd("Error retrieving folders");
+            errorResponse.setData(e.getMessage());
+            
+            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     public GetAssigntoAttachmentResponse getCombinedUserAndDivisionData(String channel) {
