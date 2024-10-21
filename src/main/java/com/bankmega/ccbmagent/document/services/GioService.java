@@ -82,12 +82,12 @@ public class GioService {
     public void updateAttachment(UpdateDocumentRequest request) throws IOException {
         // Cek apakah file kosong
         if (request.getFile() == null || request.getFile().isEmpty()) {
-            // File kosong, tetap update semua field kecuali file-related
+            // File kosong, update semua field kecuali file-related
             gioMapper.updateVtigerCrmEntity(
                     request.getAssignTo(),
                     request.getUserId(),
                     request.getDocumentId());
-
+    
             gioMapper.updateVtigerNotes(
                     request.getFileLocationType(),
                     null, // Tidak ada file yang diupdate
@@ -97,60 +97,67 @@ public class GioService {
                     request.getDescriptionAttachment(),
                     request.getTitle(),
                     request.getDocumentId());
-
+    
             // Hapus dan update owner notify
             gioMapper.deleteOwnerNotifyByCrmId(request.getDocumentId());
             gioMapper.insertOwnerNotify(request.getDocumentId(), request.getAssignTo());
-
+    
             return;
         }
-
+    
         // Jika file ada, proses penyimpanan dan update data terkait file
-        String fileName = request.getFile().getOriginalFilename();
-        long fileSize = request.getFile().getSize();
-        String fileType = request.getFile().getContentType();
-        String path = "storage/" + getPathFromDate(); // Define path based on the date
-
-        saveFile(request.getFile(), path);
-
-        // Update vtiger_crmentity
-        gioMapper.updateVtigerCrmEntity(
-                request.getAssignTo(),
-                request.getUserId(),
-                request.getDocumentId());
-
-        // Update vtiger_notes
-        gioMapper.updateVtigerNotes(
-                request.getFileLocationType(),
-                fileName,
-                request.getFileStatus() ? 1 : 0,
-                request.getFileVersion(),
-                Integer.parseInt(request.getFolderId()),
-                request.getDescriptionAttachment(),
-                request.getTitle(),
-                request.getDocumentId());
-
-        // Delete and reinsert attachment relation
-        gioMapper.deleteFromSeAttachmentsRel(request.getDocumentId());
-        gioMapper.insertIntoSeAttachmentsRel(request.getDocumentId(), getLastInsertId());
-
-        // Update owner notify
-        gioMapper.deleteOwnerNotifyByCrmId(request.getDocumentId());
-        gioMapper.insertOwnerNotify(request.getDocumentId(), request.getAssignTo());
+        MultipartFile file = request.getFile();
+        if (file != null && !file.isEmpty()) {
+            String fileName = file.getOriginalFilename();
+            long fileSize = file.getSize();
+            String fileType = file.getContentType();
+            String path = "storage/" + getPathFromDate(); // Define path based on the date
+    
+            // Menyimpan file yang diupload
+            saveFile(file, path);
+    
+            // Update vtiger_crmentity
+            gioMapper.updateVtigerCrmEntity(
+                    request.getAssignTo(),
+                    request.getUserId(),
+                    request.getDocumentId());
+    
+            // Update vtiger_notes
+            gioMapper.updateVtigerNotes(
+                    request.getFileLocationType(),
+                    fileName,
+                    request.getFileStatus() ? 1 : 0,
+                    request.getFileVersion(),
+                    Integer.parseInt(request.getFolderId()),
+                    request.getDescriptionAttachment(),
+                    request.getTitle(),
+                    request.getDocumentId());
+    
+            // Delete dan reinsert attachment relation
+            gioMapper.deleteFromSeAttachmentsRel(request.getDocumentId());
+            gioMapper.insertIntoSeAttachmentsRel(request.getDocumentId(), getLastInsertId());
+    
+            // Update owner notify
+            gioMapper.deleteOwnerNotifyByCrmId(request.getDocumentId());
+            gioMapper.insertOwnerNotify(request.getDocumentId(), request.getAssignTo());
+        }
     }
-
+    
     private void saveFile(MultipartFile file, String path) throws IOException {
+        // Membuat direktori jika tidak ada
         File directory = new File(path);
         if (!directory.exists()) {
             directory.mkdirs();
         }
-
+    
+        // Mendapatkan nama file dan membuat nama file unik
         String originalFilename = file.getOriginalFilename();
         String newFilename = generateUniqueFilename(path, originalFilename);
-
+    
+        // Menyimpan file di direktori yang sudah ditentukan
         Files.copy(file.getInputStream(), Paths.get(path, newFilename), StandardCopyOption.REPLACE_EXISTING);
     }
-
+    
     private String generateUniqueFilename(String path, String originalFilename) {
         String filename = originalFilename;
         String extension = "";
@@ -159,13 +166,15 @@ public class GioService {
             filename = originalFilename.substring(0, dotIndex);
             extension = originalFilename.substring(dotIndex);
         }
-
+    
+        // Menyusun nama file dengan ID yang unik
         filename = filename.replace(" ", "_");
         gioMapper.updateSequenceId();
         long lastSequenceId = getLastInsertId();
-
+    
         String newFilename = lastSequenceId + "_" + filename + extension;
-
+    
+        // Menangani konflik jika nama file sudah ada
         File file = new File(path, newFilename);
         int count = 1;
         while (file.exists()) {
@@ -173,19 +182,22 @@ public class GioService {
             file = new File(path, newFilename);
             count++;
         }
-
+    
         return newFilename;
     }
-
+    
     private String getPathFromDate() {
+        // Membuat path berdasarkan tahun, bulan, dan minggu
         String year = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy"));
         String month = LocalDate.now().format(DateTimeFormatter.ofPattern("MMMM"));
         String week = "week" + LocalDate.now().format(DateTimeFormatter.ofPattern("W"));
-
+    
         return year + "/" + month + "/" + week;
     }
-
+    
     private long getLastInsertId() {
+        // Mengambil ID terakhir yang dimasukkan
         return gioMapper.getLastInsertId();
     }
+
 }
