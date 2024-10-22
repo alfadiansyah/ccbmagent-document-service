@@ -140,6 +140,7 @@ public class GioService {
         MultipartFile file = request.getFile();
         if (file != null && !file.isEmpty()) {
             String fileName = file.getOriginalFilename();
+            
             long fileSize = file.getSize();
             String fileType = file.getContentType();
             String path = "storage/" + getPathFromDate(); // Define path based on the date
