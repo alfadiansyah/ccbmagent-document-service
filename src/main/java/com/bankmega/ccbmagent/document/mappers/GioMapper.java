@@ -6,11 +6,16 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import com.bankmega.ccbmagent.document.model.requests.GetAssigntoAttachmentBankMegaRequest;
 import com.bankmega.ccbmagent.document.model.requests.GetAssigntoAttachmentDivision;
 import com.bankmega.ccbmagent.document.model.requests.GetAssigntoAttachmentSyariahBankMegaRequest;
+import com.bankmega.ccbmagent.document.model.responses.GetFolderResponse;
 
 @Mapper
 @Qualifier("sqlSessionTemplateMaster")
 public interface GioMapper {
 
+    // ===================== GET FOLDER =====================
+
+    @Select("SELECT folderid, foldername FROM vtiger_attachmentsfolder ORDER BY foldername ASC")
+    List<GetFolderResponse> getFolders();
     // ===================== Division Queries =====================
     
     @Select("SELECT md.divisiid, md.nama " +
@@ -81,25 +86,30 @@ public interface GioMapper {
     void insertOwnerNotify(@Param("crmid") long crmid, @Param("smownerid") String smownerid);
 
     // UPDATE vtiger_notes
-    @Update("UPDATE vtiger_notes SET " +
-            "filelocationtype = #{fileLocationType}, " +
-            "filename = #{fileName}, " +
-            "filestatus = #{fileStatus}, " +
-            "fileversion = #{fileVersion}, " +
-            "folderid = #{folderId}, " +
-            "notecontent = #{descriptionAttachment}, " +
-            "title = #{title} " +
-            "WHERE notesid = #{documentId}")
-    int updateVtigerNotes(
-            @Param("fileLocationType") String fileLocationType,
-            @Param("fileName") String fileName,
-            @Param("fileStatus") Integer fileStatus,
-            @Param("fileVersion") String fileVersion,
-            @Param("folderId") Integer folderId,
-            @Param("descriptionAttachment") String descriptionAttachment,
-            @Param("title") String title,
-            @Param("documentId") long documentId);
+    @Update("<script>" +
+        "UPDATE vtiger_notes SET " +
+        "filelocationtype = #{fileLocationType}, " +
+        "<if test='fileName != null'>filename = #{fileName}, </if>" +  // Update hanya jika fileName tidak null
+        "filestatus = #{fileStatus}, " +
+        "fileversion = #{fileVersion}, " +
+        "folderid = #{folderId}, " +
+        "notecontent = #{descriptionAttachment}, " +
+        "title = #{title} " +
+        "WHERE notesid = #{documentId}" +
+        "</script>")
+int updateVtigerNotes(
+    @Param("fileLocationType") String fileLocationType,
+    @Param("fileName") String fileName,
+    @Param("fileStatus") Integer fileStatus,
+    @Param("fileVersion") String fileVersion,
+    @Param("folderId") Integer folderId,
+    @Param("descriptionAttachment") String descriptionAttachment,
+    @Param("title") String title,
+    @Param("documentId") long documentId);
 
+
+    @Select("SELECT filename FROM vtiger_notes WHERE notesid = #{documentId}")
+        String getFileNameByDocumentId(@Param("documentId") long documentId);
     // UPDATE Sequence ID
     
     @Update("UPDATE vtiger_crmentity_seq SET id = LAST_INSERT_ID(id + 1)")
