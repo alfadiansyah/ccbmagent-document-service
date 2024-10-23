@@ -140,14 +140,20 @@ public class GioService {
         MultipartFile file = request.getFile();
         if (file != null && !file.isEmpty()) {
             String fileName = file.getOriginalFilename();
-            
+            gioMapper.updateSequenceId();
+            long lastInsertId = getLastInsertId(); // Get last insert ID
+
             long fileSize = file.getSize();
             String fileType = file.getContentType();
             String path = "storage/" + getPathFromDate(); // Define path based on the date
     
             // Menyimpan file yang diupload
             saveFile(file, path);
-    
+            int insertCrmEntityResult = gioMapper.insertVtigerCrmentity(
+                lastInsertId, request.getUserId(), request.getAssignTo());
+        if (insertCrmEntityResult <= 0) {
+            throw new RuntimeException("Failed to insert into vtiger_crmentity");
+        }
             // Update vtiger_crmentity
             gioMapper.updateVtigerCrmEntity(
                     request.getAssignTo(),
@@ -164,7 +170,15 @@ public class GioService {
                     request.getDescriptionAttachment(),
                     request.getTitle(),
                     request.getDocumentId());
-    
+            System.out.println("____________________"+lastInsertId);
+            // Insert ke vtiger_attachments
+            gioMapper.insertVtigerAttachment(
+                lastInsertId, // Mendapatkan ID terakhir yang di-generate oleh sequence
+                fileName, // Nama file baru yang unik
+                null, // Deskripsi (kosong atau null)
+                fileType, // Tipe file
+                path // Path file
+            );
             // Delete dan reinsert attachment relation
             gioMapper.deleteFromSeAttachmentsRel(request.getDocumentId());
             gioMapper.insertIntoSeAttachmentsRel(request.getDocumentId(), getLastInsertId());
@@ -181,16 +195,18 @@ public class GioService {
         if (!directory.exists()) {
             directory.mkdirs();
         }
-    
+        // gioMapper.updateSequenceId();
+        long lastInsertId = getLastInsertId();
+
         // Mendapatkan nama file dan membuat nama file unik
         String originalFilename = file.getOriginalFilename();
-        String newFilename = generateUniqueFilename(path, originalFilename);
+        String newFilename = generateUniqueFilename(path, originalFilename,lastInsertId);
     
         // Menyimpan file di direktori yang sudah ditentukan
         Files.copy(file.getInputStream(), Paths.get(path, newFilename), StandardCopyOption.REPLACE_EXISTING);
     }
     
-    private String generateUniqueFilename(String path, String originalFilename) {
+    private String generateUniqueFilename(String path, String originalFilename, long lastInsertId) {
         String filename = originalFilename;
         String extension = "";
         int dotIndex = originalFilename.lastIndexOf('.');
@@ -199,24 +215,24 @@ public class GioService {
             extension = originalFilename.substring(dotIndex);
         }
     
-        // Menyusun nama file dengan ID yang unik
+        // Menyusun nama file dengan lastInsertId yang unik
         filename = filename.replace(" ", "_");
-        gioMapper.updateSequenceId();
-        long lastSequenceId = getLastInsertId();
     
-        String newFilename = lastSequenceId + "_" + filename + extension;
+        // Gunakan lastInsertId sebagai bagian dari nama file
+        String newFilename = lastInsertId + "_" + filename + extension;
     
         // Menangani konflik jika nama file sudah ada
         File file = new File(path, newFilename);
         int count = 1;
         while (file.exists()) {
-            newFilename = lastSequenceId + "_" + filename + "(" + count + ")" + extension;
+            newFilename = lastInsertId + "_" + filename + "(" + count + ")" + extension;
             file = new File(path, newFilename);
             count++;
         }
     
         return newFilename;
     }
+    
     
     private String getPathFromDate() {
         // Membuat path berdasarkan tahun, bulan, dan minggu

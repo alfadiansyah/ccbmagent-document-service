@@ -127,6 +127,15 @@ int updateVtigerNotes(
             @Param("userId") String userId,
             @Param("assignTo") String assignTo);
 
+    @Insert("INSERT INTO vtiger_attachments (attachmentsid, name, description, type, path) " +
+            "VALUES (#{attachmentsId}, #{name}, #{description}, #{type}, #{path})")
+    int insertVtigerAttachment(
+            @Param("attachmentsId") long attachmentsId,
+            @Param("name") String name,
+            @Param("description") String description,
+            @Param("type") String type,
+            @Param("path") String path);
+
     // DELETE and INSERT into seattachmentsrel
     @Delete("DELETE FROM vtiger_seattachmentsrel WHERE crmid = #{documentId}")
     int deleteFromSeAttachmentsRel(@Param("documentId") long documentId);
