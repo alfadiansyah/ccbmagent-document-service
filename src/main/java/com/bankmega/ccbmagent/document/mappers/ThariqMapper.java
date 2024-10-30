@@ -97,7 +97,7 @@ public interface ThariqMapper {
 
 		// step 6: insert and update document to notes and senotesrel
 		// 6.1
-		public String insertDocumentToNotes(Integer lastId, String title, String description, Boolean status, String folderId, String documentSequence, String fileVersion) {
+		public String insertDocumentToNotes(Integer lastId, String title, String description, String fileLocationType, String fileVersion, Boolean status, String folderId, String documentSequence) {
 			return "insert into"
 						+ " vtiger_notes ("
 							+ " notesid,"
@@ -108,19 +108,17 @@ public interface ThariqMapper {
 							+ " fileversion,"
 							+ " filestatus,"
 							+ " folderid,"
-							+ " note_no,"
-							+ " fileversion "
+							+ " note_no "
 						+ ") values ("
 							+ " " + lastId + ","
 							+ " '" + title + "',"
 							+ " NULL,"
 							+ " '" + description + "',"
-							+ " 'I',"
-							+ " '',"
+							+ " '" + fileLocationType + "',"
+							+ " '" + fileVersion +"',"
 							+ " " + status + ","
 							+ " '" + folderId + "',"
-							+ " '" + documentSequence + "',"
-							+ " '" + fileVersion +"' "
+							+ " '" + documentSequence + "' "
 						+ ");";
 		}
 
@@ -253,7 +251,7 @@ public interface ThariqMapper {
 
 	// step 6: insert and update document to notes and senotesrel
 	@InsertProvider(type = Query.class, method = "insertDocumentToNotes")
-	public void insertDocumentToNotes(Integer lastId, String title, String description, Boolean status, String folderId, String documentSequence, String fileVersion);
+	public void insertDocumentToNotes(Integer lastId, String title, String description, String fileLocationType, String fileVersion, Boolean status, String folderId, String documentSequence);
 
 	@InsertProvider(type = Query.class, method = "insertDocumentNotes")
 	public void insertDocumentNotes(Integer ticketId, Integer lastId);
