@@ -141,7 +141,7 @@ public class ThariqService {
         		log.info("insert document to notes");
         		fileVersion = request.getFileVersion();
         		fileLocationType = request.getFileLocationType();
-        		mapper.insertDocumentToNotes(lastId, title, description, status, folderId, "DOC" + pastCurId, fileVersion);
+        		mapper.insertDocumentToNotes(lastId, title, description, fileLocationType, fileVersion, status, folderId, "DOC" + pastCurId);
         		
         		// 6.2 insert document notes to notesrel
         		mapper.insertDocumentNotes(ticketId, lastId);
