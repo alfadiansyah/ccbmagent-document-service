@@ -8,7 +8,7 @@ import org.apache.ibatis.annotations.SelectProvider;
 import org.apache.ibatis.annotations.UpdateProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import com.bankmega.ccbmagent.document.model.responses.DataCurrResponse;
+import com.bankmega.ccbmagent.document.model.responses.DataCurrentResult;
 
 @Mapper
 @Qualifier("sqlSessionTemplateMaster")
@@ -109,8 +109,7 @@ public interface ThariqMapper {
 							+ " filestatus,"
 							+ " folderid,"
 							+ " note_no,"
-							+ " fileversion,"
-							+ " filelocationtype "
+							+ " fileversion "
 						+ ") values ("
 							+ " " + lastId + ","
 							+ " '" + title + "',"
@@ -244,7 +243,7 @@ public interface ThariqMapper {
 	public void lockTable(@Param("tableName") String tableName);
 
 	@SelectProvider(type = Query.class, method = "selectCurrentId")
-	public DataCurrResponse selectCurrentId();
+	public DataCurrentResult selectCurrentId();
 
 	@UpdateProvider(type = Query.class, method = "updateCurrentId")
 	public void updateCurrentId(String pastCurId, String futureCurId);
