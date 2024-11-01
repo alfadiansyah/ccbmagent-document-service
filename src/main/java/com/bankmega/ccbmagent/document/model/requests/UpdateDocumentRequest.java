@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class UpdateDocumentRequest {
-	private long documentId;
+	private Long documentId;
 	private String assignTo;
 	private String userId;
 	private String title;

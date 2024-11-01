@@ -10,6 +10,8 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
@@ -33,6 +35,7 @@ public class GioService {
     private final GioMapper gioMapper;
     private final Set<String> whitelistedIps = new HashSet<>();
     private static final long MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB in bytes
+	private final Log log = LogFactory.getLog(getClass());
 
     @Autowired
     public GioService(GioMapper gioMapper) {
@@ -142,18 +145,23 @@ public class GioService {
             String fileName = file.getOriginalFilename();
             gioMapper.updateSequenceId();
             long lastInsertId = getLastInsertId(); // Get last insert ID
-
+    
             long fileSize = file.getSize();
             String fileType = file.getContentType();
-            String path = "storage/" + getPathFromDate(); // Define path based on the date
+            String path = "/data/document-service/storage/"; // Base path defined in application.yml
+            String datePath = getPathFromDate(); // Get formatted date path
+    
+            String fullPath = path + datePath; // Combine base path with date path
     
             // Menyimpan file yang diupload
-            saveFile(file, path);
+            saveFile(file, fullPath);
+            
             int insertCrmEntityResult = gioMapper.insertVtigerCrmentity(
                 lastInsertId, request.getUserId(), request.getAssignTo());
-        if (insertCrmEntityResult <= 0) {
-            throw new RuntimeException("Failed to insert into vtiger_crmentity");
-        }
+            if (insertCrmEntityResult <= 0) {
+                throw new RuntimeException("Failed to insert into vtiger_crmentity");
+            }
+    
             // Update vtiger_crmentity
             gioMapper.updateVtigerCrmEntity(
                     request.getAssignTo(),
@@ -170,15 +178,16 @@ public class GioService {
                     request.getDescriptionAttachment(),
                     request.getTitle(),
                     request.getDocumentId());
-            System.out.println("____________________"+lastInsertId);
+    
             // Insert ke vtiger_attachments
             gioMapper.insertVtigerAttachment(
                 lastInsertId, // Mendapatkan ID terakhir yang di-generate oleh sequence
                 fileName, // Nama file baru yang unik
                 null, // Deskripsi (kosong atau null)
                 fileType, // Tipe file
-                path // Path file
+                fullPath // Path file
             );
+    
             // Delete dan reinsert attachment relation
             gioMapper.deleteFromSeAttachmentsRel(request.getDocumentId());
             gioMapper.insertIntoSeAttachmentsRel(request.getDocumentId(), getLastInsertId());
@@ -189,8 +198,11 @@ public class GioService {
         }
     }
     
+    
     private void saveFile(MultipartFile file, String path) throws IOException {
         // Membuat direktori jika tidak ada
+        System.out.println("Saving file to path: " + path);
+
         File directory = new File(path);
         if (!directory.exists()) {
             directory.mkdirs();
@@ -204,8 +216,22 @@ public class GioService {
     
         // Menyimpan file di direktori yang sudah ditentukan
         Files.copy(file.getInputStream(), Paths.get(path, newFilename), StandardCopyOption.REPLACE_EXISTING);
+        System.out.println("File saved successfully: " + newFilename);
+
     }
-    
+    private String dateFormatting() {
+        String result = "";
+        try {
+            String year = LocalDate.now().format(DateTimeFormatter.ofPattern("YYYY"));
+            String month = LocalDate.now().format(DateTimeFormatter.ofPattern("MMMM"));
+            String week = LocalDate.now().format(DateTimeFormatter.ofPattern("W"));
+            
+            result = "storage/" + year + "/" + month + "/week" + week + "/";
+        } catch (Exception e) {
+            log.error("ERROR: Terjadi kesalahan pada saat memformat tanggal yang disebabkan oleh " + e.getMessage());
+        }
+        return result;
+    }
     private String generateUniqueFilename(String path, String originalFilename, long lastInsertId) {
         String filename = originalFilename;
         String extension = "";
@@ -240,7 +266,7 @@ public class GioService {
         String month = LocalDate.now().format(DateTimeFormatter.ofPattern("MMMM"));
         String week = "week" + LocalDate.now().format(DateTimeFormatter.ofPattern("W"));
     
-        return year + "/" + month + "/" + week;
+        return year + "/" + month + "/" + week + "/";
     }
     
     private long getLastInsertId() {
