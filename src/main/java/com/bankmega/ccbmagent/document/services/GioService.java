@@ -182,7 +182,7 @@ public class GioService {
             // Insert ke vtiger_attachments
             gioMapper.insertVtigerAttachment(
                 lastInsertId, // Mendapatkan ID terakhir yang di-generate oleh sequence
-                fileName, // Nama file baru yang unik
+                fileName.replace(" ", "_"), // Nama file dengan spasi diganti garis bawah
                 null, // Deskripsi (kosong atau null)
                 fileType, // Tipe file
                 fullPath // Path file
@@ -219,19 +219,6 @@ public class GioService {
         System.out.println("File saved successfully: " + newFilename);
 
     }
-    private String dateFormatting() {
-        String result = "";
-        try {
-            String year = LocalDate.now().format(DateTimeFormatter.ofPattern("YYYY"));
-            String month = LocalDate.now().format(DateTimeFormatter.ofPattern("MMMM"));
-            String week = LocalDate.now().format(DateTimeFormatter.ofPattern("W"));
-            
-            result = "storage/" + year + "/" + month + "/week" + week + "/";
-        } catch (Exception e) {
-            log.error("ERROR: Terjadi kesalahan pada saat memformat tanggal yang disebabkan oleh " + e.getMessage());
-        }
-        return result;
-    }
     private String generateUniqueFilename(String path, String originalFilename, long lastInsertId) {
         String filename = originalFilename;
         String extension = "";
@@ -243,10 +230,10 @@ public class GioService {
     
         // Menyusun nama file dengan lastInsertId yang unik
         filename = filename.replace(" ", "_");
-    
+        System.out.println("+++++++++++++++ "+filename);
         // Gunakan lastInsertId sebagai bagian dari nama file
         String newFilename = lastInsertId + "_" + filename + extension;
-    
+        System.out.println(newFilename);
         // Menangani konflik jika nama file sudah ada
         File file = new File(path, newFilename);
         int count = 1;
@@ -256,6 +243,7 @@ public class GioService {
             count++;
         }
     
+        System.out.println("++++++++++"+newFilename);
         return newFilename;
     }
     
