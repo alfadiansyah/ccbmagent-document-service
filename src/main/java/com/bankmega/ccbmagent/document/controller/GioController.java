@@ -118,46 +118,44 @@ public HttpEntity<MampangApiResponse> updateDocument(
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-      @PostMapping("/getTickets")
-    public ResponseEntity<MampangApiResponse> getTickets(@RequestBody Map<String, Integer> requestBody) {
-        int userId = requestBody.get("userId");
-        try {
-            // Call the service to get the tickets
-            MampangApiResponse response = gioService.getTicketsByUserId(userId);
-
-            // Return response with appropriate HTTP status
-            if ("00".equals(response.getRc())) {
-                return new ResponseEntity<>(response, HttpStatus.OK); // Success
-            } else {
-                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR); // Error
-            }
-
-        } catch (Exception e) {
-            // Handle unexpected error
-            MampangApiResponse errorResponse = new MampangApiResponse(e.getMessage(), "01", "Error processing request");
-            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR); // Internal Server Error
-        }
-    }
-   
-    @PostMapping("/searchTickets")
-    public ResponseEntity<MampangApiResponse> searchTickets(@RequestBody Map<String, Object> requestBody) {
+    @PostMapping("/getTickets")
+    public ResponseEntity<MampangApiResponse> getTickets(@RequestBody Map<String, Object> requestBody) {
         int userId = (int) requestBody.get("userId");
-        String searchBy = (String) requestBody.get("searchBy");
-        String keyword = (String) requestBody.get("keyword");
+        int page = requestBody.get("page") != null ? (int) requestBody.get("page") : 1;
 
         try {
-            // Call service method to fetch search results
-            MampangApiResponse response = gioService.searchTickets(userId, searchBy, keyword);
+            // Call service method to fetch paginated ticket data
+            MampangApiResponse response = gioService.getTicketsByUserId(userId, page);
 
-            // Return appropriate response based on the search result
-            if ("00".equals(response.getRc())) {
-                return new ResponseEntity<>(response, HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-            }
+            // Return appropriate response based on success or error
+            return "00".equals(response.getRc()) 
+                ? new ResponseEntity<>(response, HttpStatus.OK)
+                : new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+
         } catch (Exception e) {
             MampangApiResponse errorResponse = new MampangApiResponse(e.getMessage(), "01", "Error processing request");
             return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    @PostMapping("/searchTickets")
+    public ResponseEntity<MampangApiResponse> searchTickets(@RequestBody Map<String, Object> requestBody) {
+        int userId = (int) requestBody.get("userId");
+        String searchBy = (String) requestBody.get("searchBy");
+        String keyword = (String) requestBody.get("keyword");
+        int page = requestBody.get("page") != null ? (int) requestBody.get("page") : 1;
+    
+        try {
+            // Call service method to fetch search results with pagination
+            MampangApiResponse response = gioService.searchTickets(userId, searchBy, keyword, page);
+    
+            return "00".equals(response.getRc())
+                ? new ResponseEntity<>(response, HttpStatus.OK)
+                : new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    
+        } catch (Exception e) {
+            MampangApiResponse errorResponse = new MampangApiResponse(e.getMessage(), "01", "Error processing request");
+            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
 }

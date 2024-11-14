@@ -266,40 +266,56 @@ public class GioService {
     }
 
     // TICKET STATUS
-    public MampangApiResponse getTicketsByUserId(int userId) {
+    public MampangApiResponse getTicketsByUserId(int userId, int page) {
         try {
-            // Retrieve the list of tickets from the mapper
-            List<TicketRequest> tickets = gioMapper.getTicketsByUserId(userId);
+            // Calculate offset based on page number
+            int offset = (page - 1) * PAGE_SIZE;
 
-            // If no tickets are found, return an appropriate error response
-            if (tickets.isEmpty()) {
-                return new MampangApiResponse(new ArrayList<>(), "02", "No tickets available for this user");
-            }
+            // Fetch the tickets and the total ticket count
+            List<TicketRequest> tickets = gioMapper.getTicketsByUserId(userId, PAGE_SIZE, offset);
+            int totalRecords = gioMapper.countTicketsByUserId(userId);
 
-            // Return success response with the tickets data
-            return new MampangApiResponse(tickets, "00", "Success");
+            // Calculate the total number of pages
+            int totalPages = (int) Math.ceil((double) totalRecords / PAGE_SIZE);
 
-        } catch (Exception e) {
-            // Handle unexpected errors and return error response with message
-            return new MampangApiResponse(e.getMessage(), "01", "Error retrieving tickets");
-        }
-    }
+            // Create a pagination response
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("tickets", tickets);
+            responseData.put("totalRecords", totalRecords);
+            responseData.put("totalPages", totalPages);
+            responseData.put("currentPage", page);
 
-    public MampangApiResponse searchTickets(int userId, String searchBy, String keyword) {
-        try {
-            // Fetch the tickets matching the search criteria
-            List<TicketRequest> tickets = gioMapper.searchTickets(userId, searchBy, keyword);
-            
-            // If no tickets are found, return an error response
-            if (tickets.isEmpty()) {
-                return new MampangApiResponse(new ArrayList<>(), "02", "No tickets found");
-            }
-
-            // Return success response with tickets data
-            return new MampangApiResponse(tickets, "00", "Success");
+            return new MampangApiResponse(responseData, "00", "Success");
 
         } catch (Exception e) {
             return new MampangApiResponse(e.getMessage(), "01", "Error retrieving tickets");
         }
     }
+
+    public MampangApiResponse searchTickets(int userId, String searchBy, String keyword, int page) {
+        try {
+            int limit = 15;
+            int offset = (page - 1) * limit;
+    
+            // Retrieve the tickets matching search criteria with pagination
+            List<TicketRequest> tickets = gioMapper.searchTickets(userId, searchBy, keyword, limit, offset);
+    
+            // Fetch total count of search results for pagination metadata
+            int totalRecords = gioMapper.countSearchResults(userId, searchBy, keyword);
+            int totalPages = (int) Math.ceil((double) totalRecords / limit);
+    
+            // Prepare response with pagination details
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("tickets", tickets);
+            responseData.put("totalRecords", totalRecords);
+            responseData.put("totalPages", totalPages);
+            responseData.put("currentPage", page);
+    
+            return new MampangApiResponse(responseData, "00", "Success");
+    
+        } catch (Exception e) {
+            return new MampangApiResponse(e.getMessage(), "01", "Error retrieving tickets");
+        }
+    }
+    
 }
