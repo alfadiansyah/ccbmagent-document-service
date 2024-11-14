@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import com.bankmega.ccbmagent.document.model.requests.GetAssigntoAttachmentBankMegaRequest;
 import com.bankmega.ccbmagent.document.model.requests.GetAssigntoAttachmentDivision;
 import com.bankmega.ccbmagent.document.model.requests.GetAssigntoAttachmentSyariahBankMegaRequest;
+import com.bankmega.ccbmagent.document.model.requests.TicketRequest;
 import com.bankmega.ccbmagent.document.model.responses.GetFolderResponse;
 
 @Mapper
@@ -142,4 +143,54 @@ int updateVtigerNotes(
 
     @Insert("INSERT INTO vtiger_seattachmentsrel (crmid, attachmentsid) VALUES (#{documentId}, #{attachmentsId})")
     int insertIntoSeAttachmentsRel(@Param("documentId") long documentId, @Param("attachmentsId") long attachmentsId);
+
+    // LIST DATA TICKET STATUS
+    @Select("SELECT vtt.ticket_no, vtc.createdtime, vtcf.cf_667, vtcf.cf_701, vtt.priority, vtt.status " +
+    "FROM vtiger_crmentity vtc " +
+    "LEFT JOIN vtiger_ticketcf vtcf ON vtc.crmid = vtcf.ticketid " +
+    "INNER JOIN vtiger_troubletickets vtt ON vtc.crmid = vtt.ticketid " +
+    "LEFT JOIN vtiger_ticketcomments vttc ON vtc.crmid = vttc.ticketid " +
+    "LEFT JOIN vtiger_users vtu ON vtc.smcreatorid = vtu.id " +
+    "WHERE vtc.smcreatorid = #{userId} AND vtt.status IN ('Open', 'In Progress')")
+@Results({
+    @Result(property = "ticketNo", column = "ticket_no"),
+    @Result(property = "createdTime", column = "createdtime"),
+    @Result(property = "cf667", column = "cf_667"),
+    @Result(property = "cf701", column = "cf_701"),
+    @Result(property = "priority", column = "priority"),
+    @Result(property = "status", column = "status")
+})
+List<TicketRequest> getTicketsByUserId(int userId);
+
+// SEARCH TICKET
+@Select("<script>" +
+"SELECT vtt.ticket_no, vtc.createdtime, vtcf.cf_667, vtcf.cf_701, vtt.priority, vtt.status " +
+"FROM vtiger_crmentity vtc " +
+"LEFT JOIN vtiger_ticketcf vtcf ON vtc.crmid = vtcf.ticketid " +
+"INNER JOIN vtiger_troubletickets vtt ON vtc.crmid = vtt.ticketid " +
+"LEFT JOIN vtiger_ticketcomments vttc ON vtc.crmid = vttc.ticketid " +
+"LEFT JOIN vtiger_users vtu ON vtc.smcreatorid = vtu.id " +
+"WHERE vtc.smcreatorid = #{userId} " +
+"AND vtt.status IN ('Open', 'In Progress') " +
+"<if test='searchBy != null and keyword != null'>" +
+"AND " +
+"<choose>" +
+"<when test='searchBy == \"cf_701\"'>vtcf.cf_701 LIKE CONCAT('%', #{keyword}, '%')</when>" +
+"<when test='searchBy == \"cf_644\"'>vtcf.cf_644 LIKE CONCAT('%', #{keyword}, '%')</when>" +
+"<when test='searchBy == \"cf_720\"'>vtcf.cf_720 LIKE CONCAT('%', #{keyword}, '%')</when>" +
+"<when test='searchBy == \"ticketNo\"'>vtt.ticket_no LIKE CONCAT('%', #{keyword}, '%')</when>" +
+"</choose>" +
+"</if>" +
+"</script>")
+@Results({
+        @Result(property = "ticketNo", column = "ticket_no"),
+        @Result(property = "createdTime", column = "createdtime"),
+        @Result(property = "cf667", column = "cf_667"),
+        @Result(property = "cf701", column = "cf_701"),
+        @Result(property = "priority", column = "priority"),
+        @Result(property = "status", column = "status")
+    })
+List<TicketRequest> searchTickets(@Param("userId") int userId, 
+                          @Param("searchBy") String searchBy, 
+                          @Param("keyword") String keyword);
 }

@@ -1,5 +1,7 @@
 package com.bankmega.ccbmagent.document.controller;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -113,5 +116,48 @@ public HttpEntity<MampangApiResponse> updateDocument(
         response.setRd("Success");
         response.setData("data");
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+      @PostMapping("/getTickets")
+    public ResponseEntity<MampangApiResponse> getTickets(@RequestBody Map<String, Integer> requestBody) {
+        int userId = requestBody.get("userId");
+        try {
+            // Call the service to get the tickets
+            MampangApiResponse response = gioService.getTicketsByUserId(userId);
+
+            // Return response with appropriate HTTP status
+            if ("00".equals(response.getRc())) {
+                return new ResponseEntity<>(response, HttpStatus.OK); // Success
+            } else {
+                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR); // Error
+            }
+
+        } catch (Exception e) {
+            // Handle unexpected error
+            MampangApiResponse errorResponse = new MampangApiResponse(e.getMessage(), "01", "Error processing request");
+            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR); // Internal Server Error
+        }
+    }
+   
+    @PostMapping("/searchTickets")
+    public ResponseEntity<MampangApiResponse> searchTickets(@RequestBody Map<String, Object> requestBody) {
+        int userId = (int) requestBody.get("userId");
+        String searchBy = (String) requestBody.get("searchBy");
+        String keyword = (String) requestBody.get("keyword");
+
+        try {
+            // Call service method to fetch search results
+            MampangApiResponse response = gioService.searchTickets(userId, searchBy, keyword);
+
+            // Return appropriate response based on the search result
+            if ("00".equals(response.getRc())) {
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } catch (Exception e) {
+            MampangApiResponse errorResponse = new MampangApiResponse(e.getMessage(), "01", "Error processing request");
+            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

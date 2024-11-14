@@ -23,6 +23,7 @@ import com.bankmega.ccbmagent.document.mappers.GioMapper;
 import com.bankmega.ccbmagent.document.model.requests.GetAssigntoAttachmentBankMegaRequest;
 import com.bankmega.ccbmagent.document.model.requests.GetAssigntoAttachmentDivision;
 import com.bankmega.ccbmagent.document.model.requests.GetAssigntoAttachmentSyariahBankMegaRequest;
+import com.bankmega.ccbmagent.document.model.requests.TicketRequest;
 import com.bankmega.ccbmagent.document.model.requests.UpdateDocumentRequest;
 import com.bankmega.ccbmagent.document.model.responses.GetAssigntoAttachmentResponse;
 import com.bankmega.ccbmagent.document.model.responses.GetFolderResponse;
@@ -36,6 +37,8 @@ public class GioService {
     private final Set<String> whitelistedIps = new HashSet<>();
     private static final long MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB in bytes
 	private final Log log = LogFactory.getLog(getClass());
+    private static final int PAGE_SIZE = 15;
+
 
     @Autowired
     public GioService(GioMapper gioMapper) {
@@ -262,4 +265,41 @@ public class GioService {
         return gioMapper.getLastInsertId();
     }
 
+    // TICKET STATUS
+    public MampangApiResponse getTicketsByUserId(int userId) {
+        try {
+            // Retrieve the list of tickets from the mapper
+            List<TicketRequest> tickets = gioMapper.getTicketsByUserId(userId);
+
+            // If no tickets are found, return an appropriate error response
+            if (tickets.isEmpty()) {
+                return new MampangApiResponse(new ArrayList<>(), "02", "No tickets available for this user");
+            }
+
+            // Return success response with the tickets data
+            return new MampangApiResponse(tickets, "00", "Success");
+
+        } catch (Exception e) {
+            // Handle unexpected errors and return error response with message
+            return new MampangApiResponse(e.getMessage(), "01", "Error retrieving tickets");
+        }
+    }
+
+    public MampangApiResponse searchTickets(int userId, String searchBy, String keyword) {
+        try {
+            // Fetch the tickets matching the search criteria
+            List<TicketRequest> tickets = gioMapper.searchTickets(userId, searchBy, keyword);
+            
+            // If no tickets are found, return an error response
+            if (tickets.isEmpty()) {
+                return new MampangApiResponse(new ArrayList<>(), "02", "No tickets found");
+            }
+
+            // Return success response with tickets data
+            return new MampangApiResponse(tickets, "00", "Success");
+
+        } catch (Exception e) {
+            return new MampangApiResponse(e.getMessage(), "01", "Error retrieving tickets");
+        }
+    }
 }
