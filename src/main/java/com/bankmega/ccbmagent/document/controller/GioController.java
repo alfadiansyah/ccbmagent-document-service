@@ -1,5 +1,7 @@
 package com.bankmega.ccbmagent.document.controller;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -70,13 +72,39 @@ public HttpEntity<MampangApiResponse> updateDocument(
 
     MampangApiResponse response = new MampangApiResponse("data", "00", "Success");
 
+    // Daftar ekstensi yang diperbolehkan
+    List<String> allowedExtensions = Arrays.asList(
+        "tif", "odt", "zip", "wps", "txt", "jpg", "jpeg", "png", 
+        "pdf", "rar", "doc", "docx", "xls", "xlsx"
+    );
+
     try {
-        // Validate file size if file is present
-        if (file != null && file.getSize() > MAX_FILE_SIZE) {
-            response.setRc("400");
-            response.setRd("Gagal update attachment");
-            response.setData("File size exceeds the maximum allowed size of 3MB.");
-            return new ResponseEntity<>(response, HttpStatus.PAYLOAD_TOO_LARGE);
+        if (file != null) {
+        System.out.println("++++++++"+file.getSize());
+        System.out.println("Uploaded file name: " + file.getOriginalFilename());
+        System.out.println("Extracted file extension: " + file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf('.') + 1).toLowerCase());         
+        // Validasi ukuran file
+            if (file.getSize() > MAX_FILE_SIZE) {
+                response.setRc("400");
+                response.setRd("Gagal update attachment");
+                response.setData("File size exceeds the maximum allowed size of 3MB.");
+                return new ResponseEntity<>(response, HttpStatus.PAYLOAD_TOO_LARGE);
+            }
+            System.out.println("=========="+file);
+
+            // Validasi ekstensi file
+            String fileName = file.getOriginalFilename();
+            String fileExtension = fileName != null ? fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase() : "";
+
+            if (!allowedExtensions.contains(fileExtension)) {
+                response.setRc("400");
+                response.setRd("Invalid file type!");
+                response.setData("Not Allowed extensions ");
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+            System.out.println("<>><><<><><><><<>>><><<>");
+            
+
         }
 
         // Create request object
@@ -107,6 +135,7 @@ public HttpEntity<MampangApiResponse> updateDocument(
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
+
 
     // Sample test IP endpoint (from the original controller)
     @GetMapping("/test-ip")
