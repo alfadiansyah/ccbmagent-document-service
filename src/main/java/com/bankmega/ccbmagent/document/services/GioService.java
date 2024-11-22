@@ -23,6 +23,7 @@ import com.bankmega.ccbmagent.document.mappers.GioMapper;
 import com.bankmega.ccbmagent.document.model.requests.GetAssigntoAttachmentBankMegaRequest;
 import com.bankmega.ccbmagent.document.model.requests.GetAssigntoAttachmentDivision;
 import com.bankmega.ccbmagent.document.model.requests.GetAssigntoAttachmentSyariahBankMegaRequest;
+import com.bankmega.ccbmagent.document.model.requests.TicketRequest;
 import com.bankmega.ccbmagent.document.model.requests.UpdateDocumentRequest;
 import com.bankmega.ccbmagent.document.model.responses.GetAssigntoAttachmentResponse;
 import com.bankmega.ccbmagent.document.model.responses.GetFolderResponse;
@@ -36,6 +37,8 @@ public class GioService {
     private final Set<String> whitelistedIps = new HashSet<>();
     private static final long MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB in bytes
 	private final Log log = LogFactory.getLog(getClass());
+    private static final int PAGE_SIZE = 15;
+
 
     @Autowired
     public GioService(GioMapper gioMapper) {
@@ -262,4 +265,57 @@ public class GioService {
         return gioMapper.getLastInsertId();
     }
 
+    // TICKET STATUS
+    public MampangApiResponse getTicketsByUserId(int userId, int page) {
+        try {
+            // Calculate offset based on page number
+            int offset = (page - 1) * PAGE_SIZE;
+
+            // Fetch the tickets and the total ticket count
+            List<TicketRequest> tickets = gioMapper.getTicketsByUserId(userId, PAGE_SIZE, offset);
+            int totalRecords = gioMapper.countTicketsByUserId(userId);
+
+            // Calculate the total number of pages
+            int totalPages = (int) Math.ceil((double) totalRecords / PAGE_SIZE);
+
+            // Create a pagination response
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("tickets", tickets);
+            responseData.put("totalRecords", totalRecords);
+            responseData.put("totalPages", totalPages);
+            responseData.put("currentPage", page);
+
+            return new MampangApiResponse(responseData, "00", "Success");
+
+        } catch (Exception e) {
+            return new MampangApiResponse(e.getMessage(), "01", "Error retrieving tickets");
+        }
+    }
+
+    public MampangApiResponse searchTickets(int userId, String searchBy, String keyword, int page) {
+        try {
+            int limit = 15;
+            int offset = (page - 1) * limit;
+    
+            // Retrieve the tickets matching search criteria with pagination
+            List<TicketRequest> tickets = gioMapper.searchTickets(userId, searchBy, keyword, limit, offset);
+    
+            // Fetch total count of search results for pagination metadata
+            int totalRecords = gioMapper.countSearchResults(userId, searchBy, keyword);
+            int totalPages = (int) Math.ceil((double) totalRecords / limit);
+    
+            // Prepare response with pagination details
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("tickets", tickets);
+            responseData.put("totalRecords", totalRecords);
+            responseData.put("totalPages", totalPages);
+            responseData.put("currentPage", page);
+    
+            return new MampangApiResponse(responseData, "00", "Success");
+    
+        } catch (Exception e) {
+            return new MampangApiResponse(e.getMessage(), "01", "Error retrieving tickets");
+        }
+    }
+    
 }

@@ -1,5 +1,9 @@
 package com.bankmega.ccbmagent.document.controller;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -67,13 +72,39 @@ public HttpEntity<MampangApiResponse> updateDocument(
 
     MampangApiResponse response = new MampangApiResponse("data", "00", "Success");
 
+    // Daftar ekstensi yang diperbolehkan
+    List<String> allowedExtensions = Arrays.asList(
+        "tif", "odt", "zip", "wps", "txt", "jpg", "jpeg", "png", 
+        "pdf", "rar", "doc", "docx", "xls", "xlsx"
+    );
+
     try {
-        // Validate file size if file is present
-        if (file != null && file.getSize() > MAX_FILE_SIZE) {
-            response.setRc("400");
-            response.setRd("Gagal update attachment");
-            response.setData("File size exceeds the maximum allowed size of 3MB.");
-            return new ResponseEntity<>(response, HttpStatus.PAYLOAD_TOO_LARGE);
+        if (file != null) {
+        System.out.println("++++++++"+file.getSize());
+        System.out.println("Uploaded file name: " + file.getOriginalFilename());
+        System.out.println("Extracted file extension: " + file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf('.') + 1).toLowerCase());         
+        // Validasi ukuran file
+            if (file.getSize() > MAX_FILE_SIZE) {
+                response.setRc("400");
+                response.setRd("Gagal update attachment");
+                response.setData("File size exceeds the maximum allowed size of 3MB.");
+                return new ResponseEntity<>(response, HttpStatus.PAYLOAD_TOO_LARGE);
+            }
+            System.out.println("=========="+file);
+
+            // Validasi ekstensi file
+            String fileName = file.getOriginalFilename();
+            String fileExtension = fileName != null ? fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase() : "";
+
+            if (!allowedExtensions.contains(fileExtension)) {
+                response.setRc("400");
+                response.setRd("Invalid file type!");
+                response.setData("Not Allowed extensions ");
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+            System.out.println("<>><><<><><><><<>>><><<>");
+            
+
         }
 
         // Create request object
@@ -105,6 +136,7 @@ public HttpEntity<MampangApiResponse> updateDocument(
     }
 }
 
+
     // Sample test IP endpoint (from the original controller)
     @GetMapping("/test-ip")
     public HttpEntity<MampangApiResponse> getIps() {
@@ -114,4 +146,45 @@ public HttpEntity<MampangApiResponse> updateDocument(
         response.setData("data");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @PostMapping("/getTickets")
+    public ResponseEntity<MampangApiResponse> getTickets(@RequestBody Map<String, Object> requestBody) {
+        int userId = (int) requestBody.get("userId");
+        int page = requestBody.get("page") != null ? (int) requestBody.get("page") : 1;
+
+        try {
+            // Call service method to fetch paginated ticket data
+            MampangApiResponse response = gioService.getTicketsByUserId(userId, page);
+
+            // Return appropriate response based on success or error
+            return "00".equals(response.getRc()) 
+                ? new ResponseEntity<>(response, HttpStatus.OK)
+                : new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+
+        } catch (Exception e) {
+            MampangApiResponse errorResponse = new MampangApiResponse(e.getMessage(), "01", "Error processing request");
+            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    @PostMapping("/searchTickets")
+    public ResponseEntity<MampangApiResponse> searchTickets(@RequestBody Map<String, Object> requestBody) {
+        int userId = (int) requestBody.get("userId");
+        String searchBy = (String) requestBody.get("searchBy");
+        String keyword = (String) requestBody.get("keyword");
+        int page = requestBody.get("page") != null ? (int) requestBody.get("page") : 1;
+    
+        try {
+            // Call service method to fetch search results with pagination
+            MampangApiResponse response = gioService.searchTickets(userId, searchBy, keyword, page);
+    
+            return "00".equals(response.getRc())
+                ? new ResponseEntity<>(response, HttpStatus.OK)
+                : new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    
+        } catch (Exception e) {
+            MampangApiResponse errorResponse = new MampangApiResponse(e.getMessage(), "01", "Error processing request");
+            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
 }
