@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.bankmega.ccbmagent.document.components.FileFilterComponent;
 import com.bankmega.ccbmagent.document.mappers.ThariqMapper;
 import com.bankmega.ccbmagent.document.model.responses.ApiResponse;
 import com.bankmega.ccbmagent.document.model.requests.InsertDocumentRequest;
@@ -24,7 +25,10 @@ public class ThariqService {
 	@Value("${directory.path-name}")
 	private String path;
 
-    @Autowired
+	@Autowired
+	private FileFilterComponent filter;
+
+	@Autowired
     private ThariqMapper mapper;
   
     public Object insertingDocument(InsertDocumentRequest request) {
@@ -74,8 +78,12 @@ public class ThariqService {
     				result = new ApiResponse("400", "Field File Kosong", false);
     				break;
     			}
-    			if (request.getFile().getSize() > 3000000) {
+    			if (!filter.isFileSizeAllowed(request.getFile())) {
     				result = new ApiResponse("400", "Ukuran File Lebih Dari 3MB", false);
+    				break;
+    			}
+    			if (!filter.isFileAllowed(request.getFile())) {
+    				result = new ApiResponse("400", "Invalid File Type", false);
     				break;
     			}
     			if (request.getFileStatus() == null) {
@@ -226,11 +234,19 @@ public class ThariqService {
     	
     	Object result = null;
     	try {
-    		if (file.getFile().getSize() > 3000000) {
-    			result = new ApiResponse("400", "File size is too big", false);
-    			log.info("file size: " + file.getFile().getSize());
+    		if (!filter.isFileAllowed(file.getFile())) {
+    			result = new ApiResponse("400", "Invalid File", false);
     			return result;
     		}
+    		if (!filter.isFileSizeAllowed(file.getFile())) {
+    			result = new ApiResponse("400", "Invalid File", false);
+    			return result;
+    		}
+//    		if (file.getFile().getSize() > 3000000) {
+//    			result = new ApiResponse("400", "File size is too big", false);
+//    			log.info("file size: " + file.getFile().getSize());
+//    			return result;
+//    		}
 //    		path =  path + dateFormatting();
     		log.info("path: " + path);
     		File directory = new File(path + dateFormatting() + file.getFile().getOriginalFilename());

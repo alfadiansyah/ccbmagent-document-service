@@ -22,7 +22,7 @@ logging:
     root: warn 
     com:  
       bankmega: debug
-      org.springframework.security: debug
+#      org.springframework.security: debug
 
 
 springdoc:
@@ -33,5 +33,7 @@ springdoc:
 directory:  
 #  path-name:  C://Users/23020229/Desktop/
   path-name:  /data/document-service/
-  
-
+app: 
+  filter: 
+    file-type: .tif,.odt,.zip,.wps,.txt,.jpg,.jpeg,.png,.pdf,.rar,.doc,.docx,.xls,.xlsx
+    max-size: 3
