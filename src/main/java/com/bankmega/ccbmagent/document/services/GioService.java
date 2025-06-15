@@ -35,8 +35,6 @@ public class GioService {
 
     private final GioMapper gioMapper;
     private final Set<String> whitelistedIps = new HashSet<>();
-    private static final long MAX_FILE_SIZE = 3 * 1024 * 1024; 
-	private final Log log = LogFactory.getLog(getClass());
     private static final int PAGE_SIZE = 15;
 
 
