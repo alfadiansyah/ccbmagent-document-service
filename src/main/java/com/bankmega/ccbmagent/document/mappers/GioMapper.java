@@ -90,7 +90,7 @@ public interface GioMapper {
     @Update("<script>" +
         "UPDATE vtiger_notes SET " +
         "filelocationtype = #{fileLocationType}, " +
-        "<if test='fileName != null'>filename = #{fileName}, </if>" +  // Update hanya jika fileName tidak null
+        "<if test='fileName != null'>filename = #{fileName}, </if>" +  
         "filestatus = #{fileStatus}, " +
         "fileversion = #{fileVersion}, " +
         "folderid = #{folderId}, " +

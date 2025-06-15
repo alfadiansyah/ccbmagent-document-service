@@ -35,7 +35,7 @@ public class GioService {
 
     private final GioMapper gioMapper;
     private final Set<String> whitelistedIps = new HashSet<>();
-    private static final long MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB in bytes
+    private static final long MAX_FILE_SIZE = 3 * 1024 * 1024; 
 	private final Log log = LogFactory.getLog(getClass());
     private static final int PAGE_SIZE = 15;
 
@@ -43,16 +43,13 @@ public class GioService {
     @Autowired
     public GioService(GioMapper gioMapper) {
         this.gioMapper = gioMapper;
-        reloadWhitelistedIps("api_attachment"); // Load initial IPs
+        reloadWhitelistedIps("api_attachment"); 
     }
 
     public HttpEntity<MampangApiResponse> getFolders() {
         try {
-            // Retrieve the list of folders from the mapper
             List<GetFolderResponse> folders = gioMapper.getFolders();
-            // logger.debug("Retrieved folders: {}", folders);
 			
-            // Create a response object
             MampangApiResponse response = new MampangApiResponse(folders, "00", "Success");
             response.setRc("00");
             response.setRd("Success");
@@ -60,9 +57,8 @@ public class GioService {
             
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            // Handle error and create an error response object
             MampangApiResponse errorResponse = new MampangApiResponse(e.getMessage(), "01", "Error retrieving folders");
-			// logger.error("Error retrieving folders", e);
+			
 			errorResponse.setRc("01");
             errorResponse.setRd("Error retrieving folders");
             errorResponse.setData(e.getMessage());
@@ -117,9 +113,7 @@ public class GioService {
     }
 
     public void updateAttachment(UpdateDocumentRequest request) throws IOException {
-        // Cek apakah file kosong
         if (request.getFile() == null || request.getFile().isEmpty()) {
-            // File kosong, update semua field kecuali file-related
             gioMapper.updateVtigerCrmEntity(
                     request.getAssignTo(),
                     request.getUserId(),
@@ -127,7 +121,7 @@ public class GioService {
     
             gioMapper.updateVtigerNotes(
                     request.getFileLocationType(),
-                    null, // Tidak ada file yang diupdate
+                    null, 
                     request.getFileStatus() ? 1 : 0,
                     request.getFileVersion(),
                     Integer.parseInt(request.getFolderId()),
@@ -135,28 +129,25 @@ public class GioService {
                     request.getTitle(),
                     request.getDocumentId());
     
-            // Hapus dan update owner notify
             gioMapper.deleteOwnerNotifyByCrmId(request.getDocumentId());
             gioMapper.insertOwnerNotify(request.getDocumentId(), request.getAssignTo());
     
             return;
         }
     
-        // Jika file ada, proses penyimpanan dan update data terkait file
         MultipartFile file = request.getFile();
         if (file != null && !file.isEmpty()) {
             String fileName = file.getOriginalFilename();
             gioMapper.updateSequenceId();
-            long lastInsertId = getLastInsertId(); // Get last insert ID
+            long lastInsertId = getLastInsertId(); 
     
             long fileSize = file.getSize();
             String fileType = file.getContentType();
-            String path = "/data/document-service/storage/"; // Base path defined in application.yml
-            String datePath = getPathFromDate(); // Get formatted date path
+            String path = "/data/document-service/storage/"; 
+            String datePath = getPathFromDate(); 
     
-            String fullPath = path + datePath; // Combine base path with date path
+            String fullPath = path + datePath; 
     
-            // Menyimpan file yang diupload
             saveFile(file, fullPath);
             
             int insertCrmEntityResult = gioMapper.insertVtigerCrmentity(
@@ -165,13 +156,11 @@ public class GioService {
                 throw new RuntimeException("Failed to insert into vtiger_crmentity");
             }
     
-            // Update vtiger_crmentity
             gioMapper.updateVtigerCrmEntity(
                     request.getAssignTo(),
                     request.getUserId(),
                     request.getDocumentId());
     
-            // Update vtiger_notes
             gioMapper.updateVtigerNotes(
                     request.getFileLocationType(),
                     fileName,
@@ -182,20 +171,17 @@ public class GioService {
                     request.getTitle(),
                     request.getDocumentId());
     
-            // Insert ke vtiger_attachments
             gioMapper.insertVtigerAttachment(
-                lastInsertId, // Mendapatkan ID terakhir yang di-generate oleh sequence
-                fileName.replace(" ", "_"), // Nama file dengan spasi diganti garis bawah
-                null, // Deskripsi (kosong atau null)
-                fileType, // Tipe file
-                fullPath // Path file
+                lastInsertId, 
+                fileName.replace(" ", "_"), 
+                null, 
+                fileType, 
+                fullPath 
             );
     
-            // Delete dan reinsert attachment relation
             gioMapper.deleteFromSeAttachmentsRel(request.getDocumentId());
             gioMapper.insertIntoSeAttachmentsRel(request.getDocumentId(), getLastInsertId());
     
-            // Update owner notify
             gioMapper.deleteOwnerNotifyByCrmId(request.getDocumentId());
             gioMapper.insertOwnerNotify(request.getDocumentId(), request.getAssignTo());
         }
@@ -203,21 +189,17 @@ public class GioService {
     
     
     private void saveFile(MultipartFile file, String path) throws IOException {
-        // Membuat direktori jika tidak ada
         System.out.println("Saving file to path: " + path);
 
         File directory = new File(path);
         if (!directory.exists()) {
             directory.mkdirs();
         }
-        // gioMapper.updateSequenceId();
         long lastInsertId = getLastInsertId();
 
-        // Mendapatkan nama file dan membuat nama file unik
         String originalFilename = file.getOriginalFilename();
         String newFilename = generateUniqueFilename(path, originalFilename,lastInsertId);
     
-        // Menyimpan file di direktori yang sudah ditentukan
         Files.copy(file.getInputStream(), Paths.get(path, newFilename), StandardCopyOption.REPLACE_EXISTING);
         System.out.println("File saved successfully: " + newFilename);
 
@@ -231,13 +213,10 @@ public class GioService {
             extension = originalFilename.substring(dotIndex);
         }
     
-        // Menyusun nama file dengan lastInsertId yang unik
         filename = filename.replace(" ", "_");
         System.out.println("+++++++++++++++ "+filename);
-        // Gunakan lastInsertId sebagai bagian dari nama file
         String newFilename = lastInsertId + "_" + filename + extension;
         System.out.println(newFilename);
-        // Menangani konflik jika nama file sudah ada
         File file = new File(path, newFilename);
         int count = 1;
         while (file.exists()) {
@@ -252,7 +231,6 @@ public class GioService {
     
     
     private String getPathFromDate() {
-        // Membuat path berdasarkan tahun, bulan, dan minggu
         String year = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy"));
         String month = LocalDate.now().format(DateTimeFormatter.ofPattern("MMMM"));
         String week = "week" + LocalDate.now().format(DateTimeFormatter.ofPattern("W"));
@@ -261,24 +239,18 @@ public class GioService {
     }
     
     private long getLastInsertId() {
-        // Mengambil ID terakhir yang dimasukkan
         return gioMapper.getLastInsertId();
     }
 
-    // TICKET STATUS
     public MampangApiResponse getTicketsByUserId(int userId, int page) {
         try {
-            // Calculate offset based on page number
             int offset = (page - 1) * PAGE_SIZE;
 
-            // Fetch the tickets and the total ticket count
             List<TicketRequest> tickets = gioMapper.getTicketsByUserId(userId, PAGE_SIZE, offset);
             int totalRecords = gioMapper.countTicketsByUserId(userId);
 
-            // Calculate the total number of pages
             int totalPages = (int) Math.ceil((double) totalRecords / PAGE_SIZE);
 
-            // Create a pagination response
             Map<String, Object> responseData = new HashMap<>();
             responseData.put("tickets", tickets);
             responseData.put("totalRecords", totalRecords);
@@ -297,14 +269,11 @@ public class GioService {
             int limit = 15;
             int offset = (page - 1) * limit;
     
-            // Retrieve the tickets matching search criteria with pagination
             List<TicketRequest> tickets = gioMapper.searchTickets(userId, searchBy, keyword, limit, offset);
     
-            // Fetch total count of search results for pagination metadata
             int totalRecords = gioMapper.countSearchResults(userId, searchBy, keyword);
             int totalPages = (int) Math.ceil((double) totalRecords / limit);
     
-            // Prepare response with pagination details
             Map<String, Object> responseData = new HashMap<>();
             responseData.put("tickets", tickets);
             responseData.put("totalRecords", totalRecords);

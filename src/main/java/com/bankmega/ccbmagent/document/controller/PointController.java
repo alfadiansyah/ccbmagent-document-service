@@ -7,13 +7,13 @@ import org.springframework.http.MediaType;
 
 import com.bankmega.ccbmagent.document.model.requests.PointAuthRequest;
 import com.bankmega.ccbmagent.document.model.responses.PointAuthResponse;
-import com.bankmega.ccbmagent.document.services.GioPointService;
+import com.bankmega.ccbmagent.document.services.PointService;
 @RestController
 @RequestMapping("/user/point-service")
-public class GioPointController {
+public class PointController {
 
     @Autowired
-    private GioPointService pointService;
+    private PointService pointService;
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PointAuthResponse> processPointService(@RequestBody PointAuthRequest request) throws Exception {

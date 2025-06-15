@@ -29,7 +29,7 @@ import mampang.validation.dto.MampangApiResponse;
 public class GioController {
 
     private static final Logger logger = LoggerFactory.getLogger(GioController.class);
-    private static final long MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB in bytes
+    private static final long MAX_FILE_SIZE = 3 * 1024 * 1024;  
 
     private final GioService gioService;
 
@@ -38,14 +38,11 @@ public class GioController {
         this.gioService = gioService;
     }
 
-    // gett folder
     @GetMapping("/folders-attachments")
     public HttpEntity<MampangApiResponse> getFolders() {
-        // Call the service method and return its result
         return gioService.getFolders();
     }
 
-    // Endpoint for getting assignment data
     @GetMapping("/attachment/data")
     public ResponseEntity<GetAssigntoAttachmentResponse> getAssignmentData(
             @RequestParam("channel") String channel) {
@@ -64,7 +61,7 @@ public HttpEntity<MampangApiResponse> updateDocument(
         @RequestParam("userId") String userId,
         @RequestParam("title") String title,
         @RequestParam("descriptionAttachment") String descriptionAttachment,
-        @RequestParam(required = false, value = "file") MultipartFile file,  // File menjadi opsional
+        @RequestParam(required = false, value = "file") MultipartFile file, 
         @RequestParam("fileStatus") Boolean fileStatus,
         @RequestParam("folderId") String folderId,
         @RequestParam("fileVersion") String fileVersion,
@@ -72,7 +69,6 @@ public HttpEntity<MampangApiResponse> updateDocument(
 
     MampangApiResponse response = new MampangApiResponse("data", "00", "Success");
 
-    // Daftar ekstensi yang diperbolehkan
     List<String> allowedExtensions = Arrays.asList(
         "tif", "odt", "zip", "wps", "txt", "jpg", "jpeg", "png", 
         "pdf", "rar", "doc", "docx", "xls", "xlsx"
@@ -83,7 +79,7 @@ public HttpEntity<MampangApiResponse> updateDocument(
         System.out.println("++++++++"+file.getSize());
         System.out.println("Uploaded file name: " + file.getOriginalFilename());
         System.out.println("Extracted file extension: " + file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf('.') + 1).toLowerCase());         
-        // Validasi ukuran file
+       
             if (file.getSize() > MAX_FILE_SIZE) {
                 response.setRc("400");
                 response.setRd("Gagal update attachment");
@@ -92,7 +88,7 @@ public HttpEntity<MampangApiResponse> updateDocument(
             }
             System.out.println("=========="+file);
 
-            // Validasi ekstensi file
+           
             String fileName = file.getOriginalFilename();
             String fileExtension = fileName != null ? fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase() : "";
 
@@ -107,20 +103,18 @@ public HttpEntity<MampangApiResponse> updateDocument(
 
         }
 
-        // Create request object
         UpdateDocumentRequest request = new UpdateDocumentRequest();
         request.setDocumentId(documentId);
         request.setAssignTo(assignTo);
         request.setUserId(userId);
         request.setTitle(title);
         request.setDescriptionAttachment(descriptionAttachment);
-        request.setFile(file);  // Assign file, even if it's null
+        request.setFile(file);  
         request.setFileStatus(fileStatus);
         request.setFolderId(folderId);
         request.setFileVersion(fileVersion);
         request.setFileLocationType(fileLocationType);
 
-        // Call the service method
         gioService.updateAttachment(request);
 
         response.setData("Updated attachment success!");
@@ -137,7 +131,6 @@ public HttpEntity<MampangApiResponse> updateDocument(
 }
 
 
-    // Sample test IP endpoint (from the original controller)
     @GetMapping("/test-ip")
     public HttpEntity<MampangApiResponse> getIps() {
         MampangApiResponse response = new MampangApiResponse("data", "00", "Success");
@@ -153,10 +146,8 @@ public HttpEntity<MampangApiResponse> updateDocument(
         int page = requestBody.get("page") != null ? (int) requestBody.get("page") : 1;
 
         try {
-            // Call service method to fetch paginated ticket data
             MampangApiResponse response = gioService.getTicketsByUserId(userId, page);
 
-            // Return appropriate response based on success or error
             return "00".equals(response.getRc()) 
                 ? new ResponseEntity<>(response, HttpStatus.OK)
                 : new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -174,7 +165,6 @@ public HttpEntity<MampangApiResponse> updateDocument(
         int page = requestBody.get("page") != null ? (int) requestBody.get("page") : 1;
     
         try {
-            // Call service method to fetch search results with pagination
             MampangApiResponse response = gioService.searchTickets(userId, searchBy, keyword, page);
     
             return "00".equals(response.getRc())
